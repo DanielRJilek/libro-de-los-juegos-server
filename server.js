@@ -1,4 +1,4 @@
-import express from 'express';
+import {express} from 'express';
 import ViteExpress from "vite-express";
 import 'mysql2';
 import { createRequire } from 'module';
