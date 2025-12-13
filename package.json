@@ -20,8 +20,10 @@
   },
   "homepage": "https://github.com/DanielRJilek/libro-de-los-juegos-server#readme",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "express-async-handler": "^1.2.0",
     "mongodb": "^7.0.0",
     "mongoose": "^9.0.1"
   }

@@ -43,7 +43,7 @@ mongoose.connection.once('open', () => {
 });
 
 mongoose.connection.on('error', err => {
-    console.log(error);
+    console.log(err);
 });
 
 
