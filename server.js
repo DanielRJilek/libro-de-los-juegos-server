@@ -4,10 +4,11 @@ const app = express();
 const path = require('path');
 const PORT = process.env.PORT || 5173;
 const connectDB = require('./config/dbConn');
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
 const indexRouter = require('./routes/root');
 const userRouter = require('./routes/userRoutes');
+const authRouter = require('./routes/authRoutes');
 
 connectDB();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use('/', express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
+app.use('/auth', authRouter);
 app.use('/users', userRouter);
 
 app.all('/*splat', (req,res) => {
