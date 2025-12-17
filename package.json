@@ -21,6 +21,7 @@
   "homepage": "https://github.com/DanielRJilek/libro-de-los-juegos-server#readme",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-async-handler": "^1.2.0",

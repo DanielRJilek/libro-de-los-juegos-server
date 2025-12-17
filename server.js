@@ -2,19 +2,21 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const path = require('path');
-const PORT = process.env.PORT || 5173;
+const cors = require('cors');
+const corsOptions = require('./config/corsOptions');
+const PORT = process.env.PORT || 3000;
 const connectDB = require('./config/dbConn');
 const mongoose = require('mongoose');
+
+connectDB();
+
+app.use(cors(corsOptions));
+app.use(express.json());
+app.use('/', express.static(path.join(__dirname, 'public')));
 
 const indexRouter = require('./routes/root');
 const userRouter = require('./routes/userRoutes');
 const authRouter = require('./routes/authRoutes');
-
-connectDB();
-
-app.use(express.json());
-
-app.use('/', express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/auth', authRouter);

@@ -5,6 +5,9 @@ const jwt = require('jsonwebtoken');
 
 const login = asyncHandler(async (req, res) => {
     // authentication
+    if (req.body === undefined) {
+        return res.status(400).json({message: "All fields are required"})
+    }
     const {username, password} = req.body;
     if (!username || !password) {
         return res.status(400).json({message: "All fields are required"});
@@ -13,7 +16,10 @@ const login = asyncHandler(async (req, res) => {
     if (!user || !user.active) {
         return res.status(401).json({message: "Unauthorized"})
     }
+    console.log("Input Password:", password);
+    console.log("Stored Hash:", user.password);
     const match = await bcrypt.compare(password, user.password);
+    console.log(`match: ${match}`);
     if (!match) {
         return res.status(401).json({message: "Unauthorized"});
     }
