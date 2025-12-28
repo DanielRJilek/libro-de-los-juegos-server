@@ -12,7 +12,11 @@ const userSchema = new mongoose.Schema({
     active: {
         type: Boolean,
         default: true
-    }
+    },
+    friends: {
+        type: String,
+        default: [] 
+    },
 })
 
 module.exports = mongoose.model('User', userSchema);

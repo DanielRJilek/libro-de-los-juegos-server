@@ -16,10 +16,7 @@ const login = asyncHandler(async (req, res) => {
     if (!user || !user.active) {
         return res.status(401).json({message: "Unauthorized"})
     }
-    console.log("Input Password:", password);
-    console.log("Stored Hash:", user.password);
     const match = await bcrypt.compare(password, user.password);
-    console.log(`match: ${match}`);
     if (!match) {
         return res.status(401).json({message: "Unauthorized"});
     }
@@ -30,7 +27,7 @@ const login = asyncHandler(async (req, res) => {
             "UserInfo": {
                 "username": user.username
             }
-        }, process.env.ACCESS_TOKEN_SECRET, {expiresIn: "1m"}
+        }, process.env.ACCESS_TOKEN_SECRET, {expiresIn: "10m"}
     )
 
     const refreshToken = jwt.sign(
