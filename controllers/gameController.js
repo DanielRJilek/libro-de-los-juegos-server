@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const Game = require('../models/Game');
 
-export const getAllGames = asyncHandler(async (req,res) => {
+const getAllGames = asyncHandler(async (req,res) => {
     const games = await Game.find().lean();
     console.log(games);
     if (!games) {
@@ -9,3 +9,5 @@ export const getAllGames = asyncHandler(async (req,res) => {
     }
     res.json(games);
 });
+
+module.exports = {getAllGames}
