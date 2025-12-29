@@ -17,10 +17,12 @@ app.use('/', express.static(path.join(__dirname, 'public')));
 const indexRouter = require('./routes/root');
 const userRouter = require('./routes/userRoutes');
 const authRouter = require('./routes/authRoutes');
+const gameRouter = require('./routes/gameRoutes')
 
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/users', userRouter);
+app.use('/games', gameRouter);
 
 app.all('/*splat', (req,res) => {
     res.status(404);

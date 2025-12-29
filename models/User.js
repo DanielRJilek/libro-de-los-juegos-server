@@ -13,10 +13,10 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
-    // friends: {
-    //     type: String,
-    //     default: [] 
-    // },
+    friends: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
 })
 
 module.exports = mongoose.model('User', userSchema);
