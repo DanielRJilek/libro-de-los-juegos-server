@@ -34,7 +34,11 @@ const createUser = asyncHandler(async (req,res) => {
 });
 
 const updateUser = asyncHandler(async (req,res) => {
-    const {id, username, password, active} = req.body;
+    const {id} = req.user;
+    if (!id) {
+        return res.status(400).json({message: "User ID required"});
+    }
+    const {username, password, active} = req.body;
     if (!username || !active) {
         return res.status(400).json({message: "All fields required"});
     }
@@ -58,7 +62,7 @@ const updateUser = asyncHandler(async (req,res) => {
 });
 
 const deleteUser = asyncHandler(async (req,res) => {
-    const {id} = req.body;
+    const {id} = req.user;
     if (!id) {
         return res.status(400).json({message: "User ID required"});
     }
@@ -68,7 +72,7 @@ const deleteUser = asyncHandler(async (req,res) => {
         return res.status(400).json({message: "User not found"});
     }
     const result = await user.deleteOne();
-    const reply = `Username ${result.username} with ID ${result.id} deleted`;
+    const reply = `User with ID ${id} deleted`;
     res.json(reply);
 });
 
