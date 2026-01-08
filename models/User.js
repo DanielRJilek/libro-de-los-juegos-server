@@ -14,10 +14,15 @@ const userSchema = new mongoose.Schema({
         default: true
     },
     friends: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        type: Array
+    },
+    friendRequests: {
+        type: Array
     },
     activeGames: {
+        type: Array
+    },
+    invites: {
         type: Array
     }
 }, {strict: false})
