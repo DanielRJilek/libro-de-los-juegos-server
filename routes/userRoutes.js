@@ -22,7 +22,7 @@ router.route('/:userid/friends')
 
 router.route('/:userid/friends/requests')
     .get(ownUser, controller.getAllFriendRequests)
-    .post(controller.sendFriendRequest)
-    .delete(controller.deleteFriendRequest)
+    .post(ownUser, controller.sendFriendRequest)
+    .delete(ownUser, controller.deleteFriendRequest)
 
 module.exports = router;

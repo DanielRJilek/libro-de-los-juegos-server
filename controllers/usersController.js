@@ -77,11 +77,13 @@ const deleteUser = asyncHandler(async (req,res) => {
 
 const getAllFriends = asyncHandler(async (req,res) => {
     const id = req.user.id;
-    const user = await User.findById(id).select('username').exec();
+    const user = await User.findById(id).exec();
     if (!user) {
         return res.status(400).json({message: "User not found"});
     }
-    res.json(user.friends);
+    const friends = await User.find({id: {$in: user.friends}})
+    console.log(friends);
+    res.json(friends);
 });
 
 const addFriend = asyncHandler(async (req,res) => {
@@ -97,9 +99,9 @@ const addFriend = asyncHandler(async (req,res) => {
     if (friendID == id) {
         return res.status(400).json({message: "Can't befriend yourself"});
     }
-    const friend = await User.find({    _id: id,
+    const inFriendList = await User.find({    _id: id,
                                         friends: {"$in": friendID}})
-    if (friend.length != 0) {
+    if (inFriendList.length != 0) {
         return res.status(409).json({message: "Already friends"});
     }
     const requested = await User.find({    _id: id,
@@ -107,7 +109,12 @@ const addFriend = asyncHandler(async (req,res) => {
     if (requested.length == 0) {
         return res.status(409).json({message: "User has not received a friend request from the other user"});
     }
+    const friend = await User.findById(friendID).exec();
+    if (!friend) {
+        return res.status(409).json({message: "Can't find user to befriend"});
+    }
     user.friends.addToSet(friendID);
+    user.friendRequests.pull(friendID);
     user.save();
     friend.friends.addToSet(id);
     friend.save();
@@ -159,9 +166,9 @@ const sendFriendRequest = asyncHandler(async (req,res) => {
     if (friendID == id) {
         return res.status(400).json({message: "Can't befriend yourself"});
     }
-    const friend = await User.find({    _id: id,
+    const inFriendList = await User.find({    _id: id,
                                         friends: {"$in": friendID}})
-    if (friend.length != 0) {
+    if (inFriendList.length != 0) {
         return res.status(409).json({message: "Already friends"});
     }
     const requests = await User.find({    _id: friendID,
@@ -169,6 +176,15 @@ const sendFriendRequest = asyncHandler(async (req,res) => {
     if (requests.length != 0) {
         return res.status(409).json({message: "Friend request already sent"});
     }
+    const friend = await User.findById(friendID).exec();
+    if (!friend) {
+        return res.status(409).json({message: "Can't find user to befriend"});
+    }
+    // console.log(friend);
+    console.log(id);
+    friend.friendRequests.addToSet(id);
+    friend.save();
+    res.status(201).json({message: `Friend request sent`});
 });
 
 const deleteFriendRequest = asyncHandler(async (req,res) => {
