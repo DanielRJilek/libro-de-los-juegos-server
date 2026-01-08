@@ -137,4 +137,43 @@ const deleteFriend = asyncHandler(async (req,res) => {
     res.status(201).json({message: `Friend removed`});
 });
 
-module.exports = {getAllUsers, createUser, updateUser, deleteUser, getAllFriends, addFriend, deleteFriend}
+const getAllFriendRequests = asyncHandler(async (req,res) => {
+    const id = req.user.id;
+    const user = await User.findById(id).exec();
+    if (!user) {
+        return res.status(400).json({message: "User not found"});
+    }
+    res.json(user.friendRequests);
+});
+
+const sendFriendRequest = asyncHandler(async (req,res) => {
+    const id = req.user.id;
+    const user = await User.findById(id).exec();
+    if (!user) {
+        return res.status(400).json({message: "User not found"});
+    }
+    const {friendID} = req.body;
+    if (!friendID) {
+        return res.status(400).json({message: "All fields required"});
+    }
+    if (friendID == id) {
+        return res.status(400).json({message: "Can't befriend yourself"});
+    }
+    const friend = await User.find({    _id: id,
+                                        friends: {"$in": friendID}})
+    if (friend.length != 0) {
+        return res.status(409).json({message: "Already friends"});
+    }
+    const requests = await User.find({    _id: friendID,
+                                        friendRequests: {"$in": id}})
+    if (requests.length != 0) {
+        return res.status(409).json({message: "Friend request already sent"});
+    }
+});
+
+const deleteFriendRequest = asyncHandler(async (req,res) => {
+
+});
+
+module.exports = {getAllUsers, createUser, updateUser, deleteUser, getAllFriends, addFriend, deleteFriend, 
+    getAllFriendRequests, sendFriendRequest, deleteFriendRequest}
