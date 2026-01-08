@@ -81,7 +81,7 @@ const getAllFriends = asyncHandler(async (req,res) => {
     if (!user) {
         return res.status(400).json({message: "User not found"});
     }
-    const friends = await User.find({id: {$in: user.friends}})
+    const friends = await User.find({_id: {$in: user.friends}}).select('username').exec();
     console.log(friends);
     res.json(friends);
 });
