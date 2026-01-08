@@ -23,7 +23,7 @@ const createUser = asyncHandler(async (req,res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const userObject = {username, "password": hashedPassword};
+    const userObject = {"username": username, "password": hashedPassword, "activeGames": []};
     const user = await User.create(userObject);
     if (user) {
         res.status(201).json({message: `New user ${username} created `});

@@ -9,10 +9,13 @@ router.route('/')
     .post(controller.createDobletInstance)
     .delete(controller.deleteDobletInstance)
 
-router.route('/:instance/')
+router.route('/:instance')
     .get(controller.getAllData)
 
 router.route('/:instance/play')
     .post(controller.play)
+
+router.route('/:instance/players')
+    .post(controller.addPlayer)
 
 module.exports = router;

@@ -17,6 +17,9 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-})
+    activeGames: {
+        type: Array
+    }
+}, {strict: false})
 
 module.exports = mongoose.model('User', userSchema);

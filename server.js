@@ -18,13 +18,11 @@ const indexRouter = require('./routes/root');
 const userRouter = require('./routes/userRoutes');
 const authRouter = require('./routes/authRoutes');
 const gameRouter = require('./routes/gameRoutes');
-const dobletRouter = require('./games/doblet/dobletRoutes')
 
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/users', userRouter);
 app.use('/games', gameRouter);
-app.use('/doblet', dobletRouter);
 
 app.all('/*splat', (req,res) => {
     res.status(404);

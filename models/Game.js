@@ -13,6 +13,6 @@ const gameSchema = new mongoose.Schema({
         type: String,
         required: false
     },
-});
+}, {strict: false});
 
 module.exports = mongoose.model('Game', gameSchema);
