@@ -40,7 +40,7 @@ const login = asyncHandler(async (req, res) => {
         maxAge: 24 * 60 * 60 * 1000
     })
 
-    res.json(user.id, {accessToken});
+    res.json({id: user.id, token: accessToken});
 });
 
 const logout = asyncHandler(async (req, res) => {
