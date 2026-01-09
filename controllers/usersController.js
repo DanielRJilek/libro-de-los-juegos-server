@@ -82,7 +82,6 @@ const getAllFriends = asyncHandler(async (req,res) => {
         return res.status(400).json({message: "User not found"});
     }
     const friends = await User.find({_id: {$in: user.friends}}).select('username').exec();
-    console.log(friends);
     res.json(friends);
 });
 
@@ -150,7 +149,8 @@ const getAllFriendRequests = asyncHandler(async (req,res) => {
     if (!user) {
         return res.status(400).json({message: "User not found"});
     }
-    res.json(user.friendRequests);
+    const friendRequests = await User.find({_id: {$in: user.friendRequests}}).select('username').exec();
+    res.json(friendRequests);
 });
 
 const sendFriendRequest = asyncHandler(async (req,res) => {
