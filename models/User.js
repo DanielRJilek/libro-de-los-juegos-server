@@ -13,6 +13,9 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    icon: {
+       type: String
+    },
     friends: {
         type: Array
     },

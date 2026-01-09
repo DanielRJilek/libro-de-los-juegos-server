@@ -159,7 +159,8 @@ const sendFriendRequest = asyncHandler(async (req,res) => {
     if (!user) {
         return res.status(400).json({message: "User not found"});
     }
-    const {friendID} = req.body;
+    const {friendUsername} = req.body;
+    const friendID = await User.find({username: friendUsername}).select("_id").exec();
     if (!friendID) {
         return res.status(400).json({message: "All fields required"});
     }
