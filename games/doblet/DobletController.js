@@ -18,14 +18,6 @@ function setCurrentPlayer(player) {
     otherPlayer = player1 ? currentPlayer == player2 : player2;
 }
 
-function rollDice(count) {
-    const dice = [];
-    for (let i=0;i<count;i++) {
-        dice.push(Math.random() * (6-1) + 1);
-    }
-    return dice;
-}
-
 const addPlayer = asyncHandler(async (req,res) => {
     const {username} = req.body;
     const gameID = req.params.instance;
@@ -42,20 +34,27 @@ const addPlayer = asyncHandler(async (req,res) => {
     if (inGame.length != 0) {
         return res.status(409).json({message: "Player already in game"});
     }
-    gameInstance.players.addToSet(newPlayer.id);
+    gameInstance.players.addToSet({ "id": newPlayer.id,
+                                    "phase": 1
+    });
     gameInstance.save();
     res.status(201).json({message: `Player ${username} added to game instance ${gameID}`});
 });
 
+// for now automatically makes the host player1, later implement the players rolling for first
 const createDobletInstance = asyncHandler(async (req,res) => {
     const id1 = req.user.id;
     const dobletObject = {  "owner": id1,
-                            "board": [['0','0','0','0'], ['0','0','0','0'], ['0','0','0','0'], ['0','0','0','0']]};
+                            "board": [[2,0,0,2], [2,0,0,2], [2,0,0,2], [2,0,0,2], [2,0,0,2], [2,0,0,2]],
+                            "currentPlayer" : id1};
     const gameInstance = await GameInstance.create(dobletObject);
     if (!gameInstance) {
         res.status(400).json({message: "Error 400"});
     }
-    gameInstance.players.addToSet(id1);
+    const player1 = {   "id": id1,
+                        "phase": 1
+    }
+    gameInstance.players.addToSet(player1);
     gameInstance.save();
     res.status(201).json({message: `New game instance created`, id: gameInstance.id});
 });
@@ -97,7 +96,7 @@ const loadGame = asyncHandler(async (req,res) => {
     if (!game) {
         return res.status(400).json({message: "Game instance not found"});
     }
-    console.log(game);
+    // console.log(game);
     return game;
 });
 
@@ -106,41 +105,14 @@ const play = asyncHandler(async (req,res) => {
     if (!id) {
         return res.status(400).json({message: "Game ID required"});
     }
-    const game = await GameInstance.findById(id).exec();
-    if (!game) {
+    const gameData = await GameInstance.findById(id).exec();
+    if (!gameData) {
         return res.status(400).json({message: "Game instance not found"});
     }
-    console.log(game);
-    const dice = rollDice(3);
-    for (let i=0; i<3; i++) {
-        if (canMove(game.currentPlayer, dice[i])) {
-            if (allPlayedDown(currentPlayer)) {
-                game.currentPlayer.phase = 2;
-            }
-            else if (gameOver()) {
-                endGame(game.currentPlayer);
-            }
-        }
-        else {
-            // other player gets to use the move if possible
-            if (canMove(game.otherPlayer, dice[i])) {
-                if (allPlayedDown(game.otherPlayer)) {
-                    game.otherPlayer.phase = 2;
-                }
-                else if (gameOver()) {
-                    endGame(game.otherPlayer);
-                }
-            }
-        }
-        
-    }
-
-    if (game.winner) {
-        return;
-    }
-    else {
-        setCurrentPlayer(game.otherPlayer);
-    }
+    // console.log(gameData);
+    let game = new Doblet(gameData.id, gameData.players[0], gameData.players[1], gameData.currentPlayer, gameData.board)
+    game.takeTurn();
+    res.status(201).json({message: `New board state: ${game.board}`});
 });
 
 module.exports = { createDobletInstance, deleteDobletInstance, play, getAllData, addPlayer}

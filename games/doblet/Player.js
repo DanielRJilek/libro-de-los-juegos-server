@@ -1,9 +1,8 @@
 const Board = require('./Board');
 
 class Player {
-    constructor(username) {
-        this.username = username;
-        this.Board = new Board();
+    constructor(id) {
+        this.id = id;
         this.phase = 1;
     }
 }
