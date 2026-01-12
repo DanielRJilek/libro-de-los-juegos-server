@@ -2,13 +2,13 @@ const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 
-const getAllUsers = asyncHandler(async (req,res) => {
-    const users = await User.find().select('-password').lean();
-    console.log(users);
-    if (!users) {
-        return res.status(400).json({message: 'No users found'});
+const getMyData = asyncHandler(async (req,res) => {
+    const {id} = req.user;
+    const user = await User.findById(id).select('username');
+    if (!user) {
+        return res.status(400).json({message: "No user found"});
     }
-    res.json(users);
+    res.json(user);
 });
 
 // For now just username. Later add profile pic, etc
@@ -201,5 +201,5 @@ const deleteFriendRequest = asyncHandler(async (req,res) => {
 
 });
 
-module.exports = {getAllUsers, getPublicUserData, createUser, updateUser, deleteUser, getAllFriends, addFriend, deleteFriend, 
+module.exports = {getMyData, getPublicUserData, createUser, updateUser, deleteUser, getAllFriends, addFriend, deleteFriend, 
     getAllFriendRequests, sendFriendRequest, deleteFriendRequest}

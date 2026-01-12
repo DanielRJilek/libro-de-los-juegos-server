@@ -8,7 +8,7 @@ const ownUser = require('../middleware/ownUser');
 // router.use(verifyJWT);
 
 router.route('/')
-    .get(verifyJWT,controller.getAllUsers)
+    .get(verifyJWT,controller.getMyData)
     .post(controller.createUser)
     .patch(verifyJWT, controller.updateUser)
     .delete(verifyJWT, controller.deleteUser)
