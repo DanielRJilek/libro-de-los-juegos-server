@@ -15,6 +15,9 @@ router.route('/')
 
 router.use(verifyJWT);
 
+router.route('/:userid')
+    .get(controller.getPublicUserData)
+
 router.route('/:userid/friends')
     .get(ownUser, controller.getAllFriends)
     .post(ownUser, controller.addFriend)

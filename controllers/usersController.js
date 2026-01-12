@@ -11,6 +11,16 @@ const getAllUsers = asyncHandler(async (req,res) => {
     res.json(users);
 });
 
+// For now just username. Later add profile pic, etc
+const getPublicUserData = asyncHandler(async (req,res) => {
+    const id = req.params.userid;
+    const user = await User.findById(id).select('username');
+    if (!user) {
+        return res.status(400).json({message: "No user found"});
+    }
+    res.json(user);
+})
+
 const createUser = asyncHandler(async (req,res) => {
     const {username, password} = req.body;
     if (!username || !password) {
@@ -161,7 +171,6 @@ const sendFriendRequest = asyncHandler(async (req,res) => {
     }
     const {username} = req.body;
     const friendID = await User.find({username}).select("_id").exec();
-    // console.log(friendUsername)
     console.log(friendID);
     if (!friendID) {
         return res.status(400).json({message: "All fields required"});
@@ -183,8 +192,6 @@ const sendFriendRequest = asyncHandler(async (req,res) => {
     if (!friend) {
         return res.status(409).json({message: "Can't find user to befriend"});
     }
-    // console.log(friend);
-    console.log(id);
     friend.friendRequests.addToSet(id);
     friend.save();
     res.status(201).json({message: `Friend request sent`});
@@ -194,5 +201,5 @@ const deleteFriendRequest = asyncHandler(async (req,res) => {
 
 });
 
-module.exports = {getAllUsers, createUser, updateUser, deleteUser, getAllFriends, addFriend, deleteFriend, 
+module.exports = {getAllUsers, getPublicUserData, createUser, updateUser, deleteUser, getAllFriends, addFriend, deleteFriend, 
     getAllFriendRequests, sendFriendRequest, deleteFriendRequest}
