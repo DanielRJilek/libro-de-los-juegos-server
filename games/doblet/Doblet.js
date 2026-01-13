@@ -6,10 +6,8 @@ const Player = require('./Player');
 
 class Doblet {
     constructor(id, player1, player2, currentPlayer, board) {
-        // console.log(player1)
         this.id = id;
         this.player1 = player1;
-        // console.log(this.player1)
         this.player2 = player2;
         this.board = board;
         this.winner = null;
@@ -23,9 +21,6 @@ class Doblet {
             // this.otherPlayer = this.player1 ? this.currentPlayer == this.player2 : this.player2;
             this.otherPlayer = this.player1;
         }
-        // console.log(this.player1)
-        // console.log(this.player2)
-        // console.log(this.currentPlayer);
     }
 
     setup() {}
@@ -60,14 +55,11 @@ class Doblet {
     }
 
     canMove(player, i) {
-        // console.log(`i = ${i}`);
         if (player == this.player1) {
             if (player.phase == 1) {
                 if (this.board[i][1] == 0) {
-                    // console.log(this.board);
                     this.board[i][0]--;
                     this.board[i][1]++;
-                    // console.log(this.board);
                     return true;
                 }
                 else {
@@ -169,14 +161,12 @@ class Doblet {
                     }
                 }
             }
-            // console.log(this.board);
         }
         if (this.winner) {
             return;
         }
         else {
             this.setCurrentPlayer(this.otherPlayer);
-            // console.log(this.currentPlayer);
         }
     }
 

@@ -97,7 +97,6 @@ const loadGame = asyncHandler(async (req,res) => {
     if (!game) {
         return res.status(400).json({message: "Game instance not found"});
     }
-    // console.log(game);
     return game;
 });
 
@@ -110,19 +109,16 @@ const play = asyncHandler(async (req,res) => {
     if (!game) {
         return res.status(400).json({message: "Game instance not found"});
     }
-    // console.log(gameData);
     console.log(game.currentPlayer)
     let gameModel = new Doblet(game.id, game.players[0], game.players[1], game.currentPlayer, game.board)
     gameModel.takeTurn();
-    // console.log(game.currentPlayer)
     console.log(gameModel.currentPlayer.id)
     // game.currentPlayer = gameModel.currentPlayer.id;
     // game.board = gameModel.board;
     // game.markModified('board')
     // game.markModified('currentPlayer')  
     // await game.save();
-    const updatedGame = await GameInstance.findByIdAndUpdate(id, {"currentPlayer": gameModel.currentPlayer.id, "board": gameModel.board})
-    // console.log(game.currentPlayer);
+    const updatedGame = await GameInstance.findByIdAndUpdate(id, {"currentPlayer": gameModel.currentPlayer.id, "board": gameModel.board, "players": [gameModel.player1, gameModel.player2]});
     res.status(201).json({message: `New board state: ${game.board}`, board: game.board, currentPlayer: game.currentPlayer});
 });
 
