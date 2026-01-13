@@ -118,14 +118,14 @@ class Doblet {
     allPlayedDown(player) {
         if (player == this.player1) {
             for (let i=0; i<6;i++) {
-                if (this.board[i][1] != 1) {
+                if (this.board[i][0] != 1) {
                     return false;
                 }
             }
         }
         else if (player == this.player2) {
             for (let i=0; i<6;i++) {
-                if (this.board[i][2] != 1) {
+                if (this.board[i][3] != 1) {
                     return false;
                 }
             }
