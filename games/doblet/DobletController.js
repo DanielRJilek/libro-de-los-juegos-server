@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const GameInstance = require('../../models/GameInstance');
 const User = require('../../models/User');
 const Doblet = require('./Doblet');
+const Game = require('../../models/Game');
 
 function startingPlayer(player1, player2) {
     player1Roll = Math.random() * (6-1) + 1;
@@ -46,7 +47,7 @@ const createDobletInstance = asyncHandler(async (req,res) => {
     const id1 = req.user.id;
     const dobletObject = {  "owner": id1,
                             "board": [[2,0,0,2], [2,0,0,2], [2,0,0,2], [2,0,0,2], [2,0,0,2], [2,0,0,2]],
-                            "currentPlayer" : id1};
+                            "currentPlayer": id1};
     const gameInstance = await GameInstance.create(dobletObject);
     if (!gameInstance) {
         res.status(400).json({message: "Error 400"});
@@ -105,14 +106,24 @@ const play = asyncHandler(async (req,res) => {
     if (!id) {
         return res.status(400).json({message: "Game ID required"});
     }
-    const gameData = await GameInstance.findById(id).exec();
-    if (!gameData) {
+    const game = await GameInstance.findById(id).exec();
+    if (!game) {
         return res.status(400).json({message: "Game instance not found"});
     }
     // console.log(gameData);
-    let game = new Doblet(gameData.id, gameData.players[0], gameData.players[1], gameData.currentPlayer, gameData.board)
-    game.takeTurn();
-    res.status(201).json({message: `New board state: ${game.board}`, board: game.board});
+    console.log(game.currentPlayer)
+    let gameModel = new Doblet(game.id, game.players[0], game.players[1], game.currentPlayer, game.board)
+    gameModel.takeTurn();
+    // console.log(game.currentPlayer)
+    console.log(gameModel.currentPlayer.id)
+    // game.currentPlayer = gameModel.currentPlayer.id;
+    // game.board = gameModel.board;
+    // game.markModified('board')
+    // game.markModified('currentPlayer')  
+    // await game.save();
+    const updatedGame = await GameInstance.findByIdAndUpdate(id, {"currentPlayer": gameModel.currentPlayer.id, "board": gameModel.board})
+    // console.log(game.currentPlayer);
+    res.status(201).json({message: `New board state: ${game.board}`, board: game.board, currentPlayer: game.currentPlayer});
 });
 
 module.exports = { createDobletInstance, deleteDobletInstance, play, getAllData, addPlayer}

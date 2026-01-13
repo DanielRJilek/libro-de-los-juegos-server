@@ -5,10 +5,12 @@ This represents the model of the game
 const Player = require('./Player');
 
 class Doblet {
-    constructor(id, player1ID, player2ID, currentPlayer, board) {
+    constructor(id, player1, player2, currentPlayer, board) {
+        // console.log(player1)
         this.id = id;
-        this.player1 = new Player(player1ID);
-        this.player2 = new Player(player2ID);
+        this.player1 = player1;
+        // console.log(this.player1)
+        this.player2 = player2;
         this.board = board;
         this.winner = null;
         if (currentPlayer == this.player1.id) {
@@ -21,6 +23,9 @@ class Doblet {
             // this.otherPlayer = this.player1 ? this.currentPlayer == this.player2 : this.player2;
             this.otherPlayer = this.player1;
         }
+        // console.log(this.player1)
+        // console.log(this.player2)
+        // console.log(this.currentPlayer);
     }
 
     setup() {}
@@ -35,10 +40,9 @@ class Doblet {
     // }
 
     setCurrentPlayer(player) {
-        if (this.currentPlayer == player) {
-            this.currentPlayer = player1;
-            this.otherPlayer = this.player1 ? this.currentPlayer == this.player2 : this.player2;
-        }
+        this.currentPlayer = player;
+        this.otherPlayer = this.player1 ? this.currentPlayer == this.player2 : this.player2;
+        
     }
 
     getRandomInt(min, max) {
@@ -165,13 +169,14 @@ class Doblet {
                     }
                 }
             }
-            console.log(this.board);
+            // console.log(this.board);
         }
         if (this.winner) {
             return;
         }
         else {
             this.setCurrentPlayer(this.otherPlayer);
+            // console.log(this.currentPlayer);
         }
     }
 

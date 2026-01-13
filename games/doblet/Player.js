@@ -1,9 +1,9 @@
 const Board = require('./Board');
 
 class Player {
-    constructor(id) {
+    constructor(id, phase) {
         this.id = id;
-        this.phase = 1;
+        this.phase = phase;
     }
 }
 
