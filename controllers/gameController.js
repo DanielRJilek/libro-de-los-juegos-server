@@ -10,4 +10,13 @@ const getAllGames = asyncHandler(async (req,res) => {
     res.json(games);
 });
 
-module.exports = {getAllGames}
+const getGameInfo = asyncHandler(async (req,res) => {
+    const title = req.params.title;
+    const game = await Game.find(title);
+    if (!games) {
+        return res.status(400).json({message: 'No game found with that title'})
+    }
+    res.json(game);
+})
+
+module.exports = {getAllGames, getGameInfo}
