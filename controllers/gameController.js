@@ -3,7 +3,7 @@ const Game = require('../models/Game');
 
 const getAllGames = asyncHandler(async (req,res) => {
     const games = await Game.find().lean();
-    console.log(games);
+    // console.log(games);
     if (!games) {
         return res.status(400).json({message: 'No games found'});
     }
@@ -12,8 +12,8 @@ const getAllGames = asyncHandler(async (req,res) => {
 
 const getGameInfo = asyncHandler(async (req,res) => {
     const title = req.params.title;
-    const game = await Game.find(title);
-    if (!games) {
+    const game = await Game.find({"title": title}).lean();
+    if (!game) {
         return res.status(400).json({message: 'No game found with that title'})
     }
     res.json(game);
