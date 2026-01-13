@@ -109,6 +109,9 @@ const play = asyncHandler(async (req,res) => {
     if (!game) {
         return res.status(400).json({message: "Game instance not found"});
     }
+    if (game.currentPlayer != req.user.id) {
+        return res.status(403).json({message: "Forbidden"});
+    }
     console.log(game.currentPlayer)
     let gameModel = new Doblet(game.id, game.players[0], game.players[1], game.currentPlayer, game.board)
     gameModel.takeTurn();
