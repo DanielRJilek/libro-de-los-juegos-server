@@ -63,7 +63,7 @@ class Doblet {
         // console.log(`i = ${i}`);
         if (player == this.player1) {
             if (player.phase == 1) {
-                if (this.board[i][1] == 1) {
+                if (this.board[i][1] == 0) {
                     // console.log(this.board);
                     this.board[i][0]--;
                     this.board[i][1]++;
@@ -90,7 +90,7 @@ class Doblet {
         }
         else if (player == this.player2) {
             if (player.phase == 1) {
-                if (this.board[i][2] == 1) {
+                if (this.board[i][2] == 0) {
                     this.board[i][3]--;
                     this.board[i][2]++;
                     return true;
