@@ -37,8 +37,11 @@ app.all('/*splat', (req,res) => {
     }
 });
 
+const {createServer} = require('http')
+const server = createServer(app);
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({server, path: '/ws'});
+console.log("Websocket server running");
 wss.on('connection', (ws) => {
     console.log("Client connected");
     ws.send("Hello client!");
