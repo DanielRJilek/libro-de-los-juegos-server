@@ -5,6 +5,7 @@ const path = require('path');
 const cors = require('cors');
 const corsOptions = require('./config/corsOptions');
 const PORT = process.env.PORT || 3000;
+const wsport = process.env.PORT || 10000;
 const connectDB = require('./config/dbConn');
 const mongoose = require('mongoose');
 
@@ -48,6 +49,9 @@ wss.on('connection', (ws) => {
 })
 wss.on('close', () => {
     console.log("client disconnected");
+})
+server.listen(wsport, () => {
+    console.log(`Websocket server is listening on port ${wsport}`);
 })
 
 
