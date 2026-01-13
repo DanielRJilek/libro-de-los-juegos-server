@@ -112,7 +112,7 @@ const play = asyncHandler(async (req,res) => {
     // console.log(gameData);
     let game = new Doblet(gameData.id, gameData.players[0], gameData.players[1], gameData.currentPlayer, gameData.board)
     game.takeTurn();
-    res.status(201).json({message: `New board state: ${game.board}`});
+    res.status(201).json({message: `New board state: ${game.board}`, board: game.board});
 });
 
 module.exports = { createDobletInstance, deleteDobletInstance, play, getAllData, addPlayer}
