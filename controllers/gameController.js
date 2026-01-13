@@ -12,7 +12,7 @@ const getAllGames = asyncHandler(async (req,res) => {
 
 const getGameInfo = asyncHandler(async (req,res) => {
     const title = req.params.title;
-    const game = await Game.find({"title": title}).lean();
+    const game = await Game.findOne({"title": title}).lean();
     if (!game) {
         return res.status(400).json({message: 'No game found with that title'})
     }
