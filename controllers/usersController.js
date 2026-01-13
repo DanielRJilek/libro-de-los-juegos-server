@@ -201,5 +201,13 @@ const deleteFriendRequest = asyncHandler(async (req,res) => {
 
 });
 
+const addActiveGame = asyncHandler(async (req,res) => {
+
+});
+
+const acceptGameInvite = asyncHandler(async (req,res) => {
+
+});
+
 module.exports = {getMyData, getPublicUserData, createUser, updateUser, deleteUser, getAllFriends, addFriend, deleteFriend, 
     getAllFriendRequests, sendFriendRequest, deleteFriendRequest}

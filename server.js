@@ -37,6 +37,16 @@ app.all('/*splat', (req,res) => {
     }
 });
 
+const WebSocket = require('ws');
+const wss = new WebSocket.Server({port: 8080});
+wss.on('connection', (ws) => {
+    console.log("Client connected");
+    ws.send("Hello client!");
+})
+wss.on('close', () => {
+    console.log("client disconnected");
+})
+
 
 mongoose.connection.once('open', () => {
     console.log("Connected to MongoDB");
