@@ -4,8 +4,7 @@ const app = express();
 const path = require('path');
 const cors = require('cors');
 const corsOptions = require('./config/corsOptions');
-const PORT = process.env.PORT || 3000;
-const wsport = process.env.PORT || 10000;
+const PORT = process.env.PORT || 10000;
 const connectDB = require('./config/dbConn');
 const mongoose = require('mongoose');
 
@@ -50,19 +49,20 @@ wss.on('connection', (ws) => {
 wss.on('close', () => {
     console.log("client disconnected");
 })
-server.listen(wsport, () => {
-    console.log(`Websocket server is listening on port ${wsport}`);
-})
+
 
 
 mongoose.connection.once('open', () => {
     console.log("Connected to MongoDB");
-    app.listen(PORT, (error) => {
-        if (error) {
-            throw error;
-        }
-        console.log(`Server is listening on port ${PORT}`);
-    });
+    // app.listen(PORT, (error) => {
+    //     if (error) {
+    //         throw error;
+    //     }
+    //     console.log(`Server is listening on port ${PORT}`);
+    // });
+    server.listen(PORT, () => {
+    console.log(`Websocket server is listening on port ${PORT}`);
+})
 });
 
 mongoose.connection.on('error', err => {
