@@ -39,9 +39,10 @@ app.all('/*splat', (req,res) => {
 
 const {createServer} = require('http')
 const server = createServer(app);
-const WebSocket = require('ws');
-const wss = new WebSocket.Server({server, path: '/ws'});
-console.log("Websocket server running");
+// const WebSocket = require('ws');
+// const wss = new WebSocket.Server({server, path: '/ws'});
+// console.log("Websocket server running");
+const wss = require('./webSocket').init(server, path);
 wss.on('connection', (ws) => {
     console.log("Client connected");
     ws.send("Hello client!");
@@ -62,11 +63,11 @@ mongoose.connection.once('open', () => {
     // });
     server.listen(PORT, () => {
     console.log(`Websocket server is listening on port ${PORT}`);
-})
+    })
 });
 
 mongoose.connection.on('error', err => {
     console.log(err);
 });
 
-
+module.exports = app;

@@ -4,6 +4,7 @@ const GameInstance = require('../../models/GameInstance');
 const User = require('../../models/User');
 const Doblet = require('./Doblet');
 const Game = require('../../models/Game');
+const wss = require('../../webSocket').get();
 
 function startingPlayer(player1, player2) {
     player1Roll = Math.random() * (6-1) + 1;
@@ -116,12 +117,12 @@ const play = asyncHandler(async (req,res) => {
     let gameModel = new Doblet(game.id, game.players[0], game.players[1], game.currentPlayer, game.board)
     gameModel.takeTurn();
     console.log(gameModel.currentPlayer.id)
-    // game.currentPlayer = gameModel.currentPlayer.id;
-    // game.board = gameModel.board;
-    // game.markModified('board')
-    // game.markModified('currentPlayer')  
-    // await game.save();
     const updatedGame = await GameInstance.findByIdAndUpdate(id, {"currentPlayer": gameModel.currentPlayer.id, "board": gameModel.board, "players": [gameModel.player1, gameModel.player2]});
+    wss.clients.forEach(function each(client) {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(updatedGame);
+    }
+  })
     res.status(201).json({message: `New board state: ${game.board}`, board: game.board, currentPlayer: game.currentPlayer});
 });
 
