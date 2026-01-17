@@ -38,7 +38,8 @@ const addPlayer = asyncHandler(async (req,res) => {
         return res.status(409).json({message: "Player already in game"});
     }
     gameInstance.players.addToSet({ "id": newPlayer.id,
-                                    "phase": 1
+                                    "phase": 1,
+                                    "username": newPlayer.username
     });
     gameInstance.save();
     res.status(201).json({message: `Player ${username} added to game instance ${gameID}`});
@@ -47,18 +48,21 @@ const addPlayer = asyncHandler(async (req,res) => {
 // for now automatically makes the host player1, later implement the players rolling for first
 const createDobletInstance = asyncHandler(async (req,res) => {
     const id1 = req.user.id;
+    const user1 = await User.findById(id1).select('username');
     const dobletObject = {  "owner": id1,
                             "board": [[2,0,0,2], [2,0,0,2], [2,0,0,2], [2,0,0,2], [2,0,0,2], [2,0,0,2]],
-                            "currentPlayer": id1};
+                            "currentPlayer":{"id": id1, "username": user1.username}};
     const gameInstance = await GameInstance.create(dobletObject);
     if (!gameInstance) {
         res.status(400).json({message: "Error 400"});
     }
     const player1 = {   "id": id1,
-                        "phase": 1
+                        "phase": 1,
+                        "username": user1.username
     }
     gameInstance.players.addToSet(player1);
     gameInstance.save();
+    // server = wss.init();
     res.status(201).json({message: `New game instance created`, id: gameInstance.id});
 });
 
@@ -79,7 +83,7 @@ const deleteDobletInstance = asyncHandler(async (req,res) => {
 
 const getAllData = asyncHandler(async (req,res) => {
     const id = req.params.instance;
-    console.log(req.params.instance)
+    // console.log(req.params.instance)
     if (!id) {
         return res.status(400).json({message: "Game ID required"});
     }
@@ -111,21 +115,26 @@ const play = asyncHandler(async (req,res) => {
     if (!game) {
         return res.status(400).json({message: "Game instance not found"});
     }
-    if (game.currentPlayer != req.user.id) {
+    if (game.currentPlayer.id != req.user.id) {
         return res.status(403).json({message: "Forbidden"});
     }
-    console.log(game.currentPlayer)
+    // console.log(game.currentPlayer)
+    console.log(game.players);
     let gameModel = new Doblet(game.id, game.players[0], game.players[1], game.currentPlayer, game.board)
     gameModel.takeTurn();
-    console.log(gameModel.currentPlayer.id)
-    const updatedGame = await GameInstance.findByIdAndUpdate(id, {"currentPlayer": gameModel.currentPlayer.id, "board": gameModel.board, "players": [gameModel.player1, gameModel.player2]}).select('board').select('players').select('currentPlayer');
+    console.log(`Current player in model after turn: ${gameModel.currentPlayer.username}`);
+    const updatedGame = await GameInstance.findByIdAndUpdate(id, {"currentPlayer": gameModel.currentPlayer, "board": gameModel.board, "players": [gameModel.player1, gameModel.player2]}, {new: true});
     // console.log(wss);
     // wss.broadcast(updatedGame);
+    // game.markModified('currentPlayer');
+    // await game.save();
     const update = async() => {
-        sendMessage(updatedGame.board, updatedGame.players, updatedGame.currentPlayer);
+        sendMessage(game.board);
     }
-    
-    res.status(201).json({message: `New board state: ${game.board}`, updatedGame});
+    if (gameModel.winner) {
+        res.status(201).json({message: `New board state: ${updatedGame.board}`, board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, winner: gameModel.winner});
+    }
+    res.status(201).json({message: `New board state: ${updatedGame.board}`, board: updatedGame.board, currentPlayer: updatedGame.currentPlayer});
 });
 
 module.exports = { createDobletInstance, deleteDobletInstance, play, getAllData, addPlayer}
