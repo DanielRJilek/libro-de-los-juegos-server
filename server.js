@@ -43,13 +43,13 @@ const server = createServer(app);
 // const wss = new WebSocket.Server({server, path: '/ws'});
 // console.log("Websocket server running");
 const wss = require('./webSocket').init(server, path);
-wss.on('connection', (ws) => {
-    console.log("Client connected");
-    ws.send("Hello client!");
-})
-wss.on('close', () => {
-    console.log("client disconnected");
-})
+// wss.on('connection', (ws) => {
+//     console.log("Client connected");
+//     ws.send("Hello client!");
+// })
+// wss.on('close', () => {
+//     console.log("client disconnected");
+// })
 
 
 

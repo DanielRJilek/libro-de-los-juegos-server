@@ -118,11 +118,22 @@ const play = asyncHandler(async (req,res) => {
     gameModel.takeTurn();
     console.log(gameModel.currentPlayer.id)
     const updatedGame = await GameInstance.findByIdAndUpdate(id, {"currentPlayer": gameModel.currentPlayer.id, "board": gameModel.board, "players": [gameModel.player1, gameModel.player2]});
-    wss.clients.forEach(function each(client) {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(updatedGame);
-    }
-  })
+    wss.on('connection', function connection(ws) {
+        console.log("Client connected");
+        ws.send("Hello client!");
+        ws.on('error', console.error);
+
+        ws.on('message', function message(data) {
+            wss.clients.forEach(function each(client) {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(data);
+                }
+            });
+        });
+    });
+    wss.on('close', () => {
+        console.log("client disconnected");
+    })
     res.status(201).json({message: `New board state: ${game.board}`, board: game.board, currentPlayer: game.currentPlayer});
 });
 
