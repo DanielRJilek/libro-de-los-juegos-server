@@ -43,29 +43,8 @@ const server = createServer(app);
 // const wss = new WebSocket.Server({server, path: '/ws'});
 // console.log("Websocket server running");
 const wss = require('./webSocket').init(server, path);
-wss.on('connection', function connection(ws) {
-    console.log("Client connected");
-    ws.send("Hello client!");
-    ws.on('error', console.error);
+wss.broadcast("helllo");
 
-    ws.on('message', function message(data) {
-        wss.clients.forEach(function each(client) {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(data);
-            }
-        });
-    });
-    // const broadcast = (msg) => {
-    //     wss.clients.forEach(function each(client) {
-    //         if (client.readyState === WebSocket.OPEN) {
-    //             client.send(data);
-    //         }
-    //     });
-    // }
-});
-wss.on('close', () => {
-    console.log("client disconnected");
-});
 
 
 
