@@ -118,6 +118,7 @@ const play = asyncHandler(async (req,res) => {
     gameModel.takeTurn();
     console.log(gameModel.currentPlayer.id)
     const updatedGame = await GameInstance.findByIdAndUpdate(id, {"currentPlayer": gameModel.currentPlayer.id, "board": gameModel.board, "players": [gameModel.player1, gameModel.player2]});
+    console.log(wss);
     wss.broadcast(updatedGame);
     res.status(201).json({message: `New board state: ${game.board}`, board: game.board, currentPlayer: game.currentPlayer});
 });
