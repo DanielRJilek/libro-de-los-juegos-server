@@ -4,7 +4,8 @@ const GameInstance = require('../../models/GameInstance');
 const User = require('../../models/User');
 const Doblet = require('./Doblet');
 const Game = require('../../models/Game');
-const wss = require('../../webSocket').get();
+const {sendMessage} = require('../../server')
+
 
 function startingPlayer(player1, player2) {
     player1Roll = Math.random() * (6-1) + 1;
@@ -117,10 +118,14 @@ const play = asyncHandler(async (req,res) => {
     let gameModel = new Doblet(game.id, game.players[0], game.players[1], game.currentPlayer, game.board)
     gameModel.takeTurn();
     console.log(gameModel.currentPlayer.id)
-    const updatedGame = await GameInstance.findByIdAndUpdate(id, {"currentPlayer": gameModel.currentPlayer.id, "board": gameModel.board, "players": [gameModel.player1, gameModel.player2]});
-    console.log(wss);
-    wss.broadcast(updatedGame);
-    res.status(201).json({message: `New board state: ${game.board}`, board: game.board, currentPlayer: game.currentPlayer});
+    const updatedGame = await GameInstance.findByIdAndUpdate(id, {"currentPlayer": gameModel.currentPlayer.id, "board": gameModel.board, "players": [gameModel.player1, gameModel.player2]}).select('board').select('players').select('currentPlayer');
+    // console.log(wss);
+    // wss.broadcast(updatedGame);
+    const update = async() => {
+        sendMessage(updatedGame.board, updatedGame.players, updatedGame.currentPlayer);
+    }
+    
+    res.status(201).json({message: `New board state: ${game.board}`, updatedGame});
 });
 
 module.exports = { createDobletInstance, deleteDobletInstance, play, getAllData, addPlayer}

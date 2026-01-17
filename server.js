@@ -37,28 +37,22 @@ app.all('/*splat', (req,res) => {
     }
 });
 
-const {createServer} = require('http')
+const {createServer} = require('http');
+const allowedOrigins = require('./config/allowedOrigins');
 const server = createServer(app);
-// const WebSocket = require('ws');
-// const wss = new WebSocket.Server({server, path: '/ws'});
-// console.log("Websocket server running");
-const wss = require('./webSocket').init(server, path);
-wss.broadcast("helllo");
-
-
-
-
+const io = require('socket.io')(server, {cors: {origin: allowedOrigins}});
+console.log("Websocket server running");
+io.on('connection', socket => {
+    console.log("client connected");
+    socket.on('join-table', (tableID, userID) => {
+        socket.join(tableID);
+    })
+})
 
 mongoose.connection.once('open', () => {
     console.log("Connected to MongoDB");
-    // app.listen(PORT, (error) => {
-    //     if (error) {
-    //         throw error;
-    //     }
-    //     console.log(`Server is listening on port ${PORT}`);
-    // });
     server.listen(PORT, () => {
-    console.log(`Websocket server is listening on port ${PORT}`);
+        console.log(`Server is listening on port ${PORT}`);
     })
 });
 
@@ -66,4 +60,4 @@ mongoose.connection.on('error', err => {
     console.log(err);
 });
 
-module.exports = app;
+exports.sendMessage = (roomId, message) => io.to(roomId).broadcast.emit(message);
