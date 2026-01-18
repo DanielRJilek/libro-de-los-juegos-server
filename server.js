@@ -46,13 +46,6 @@ io.on('connection', socket => {
     console.log("client connected");
     socket.on('join-table', (tableID, userID) => {
         socket.join(tableID);
-        console.log(`tableID: ${tableID}`)
-        // module.exports.sendMessage = (roomId, event, message) => {
-        //     console.log(message);
-        //     console.log(event);
-        //     socket.to(roomId).emit(event, message)
-        // };
-        
     })
     module.exports = io;
     
@@ -68,5 +61,3 @@ mongoose.connection.once('open', () => {
 mongoose.connection.on('error', err => {
     console.log(err);
 });
-
-// module.exports.sendMessage = (roomId, event, message) => io.to(roomId).broadcast.emit(event, message);

@@ -21,6 +21,17 @@ const getPublicUserData = asyncHandler(async (req,res) => {
     res.json(user);
 })
 
+const getPrivateUserData = asyncHandler(async (req,res) => {
+    const id = req.params.userid;
+    const user = await User.findById(id);
+    if (!user) {
+        return res.status(400).json({message: "No user found"});
+    }
+    const friendRequests = await User.find({_id: {$in: user.friendRequests}}).select('username').exec();
+    const friends = await User.find({_id: {$in: user.friends}}).select('username').exec();
+    res.json({id: user.id, username: user.username, friends: friends, friendRequests: friendRequests, invites: user.invites, activeGames: user.activeGames});
+})
+
 const createUser = asyncHandler(async (req,res) => {
     const {username, password} = req.body;
     if (!username || !password) {
@@ -171,7 +182,6 @@ const sendFriendRequest = asyncHandler(async (req,res) => {
     }
     const {username} = req.body;
     const friendID = await User.find({username}).select("_id").exec();
-    // console.log(friendID);
     if (!friendID) {
         return res.status(400).json({message: "All fields required"});
     }
@@ -198,7 +208,18 @@ const sendFriendRequest = asyncHandler(async (req,res) => {
 });
 
 const deleteFriendRequest = asyncHandler(async (req,res) => {
-
+    const id = req.user.id;
+    const user = await User.findById(id).exec();
+    if (!user) {
+        return res.status(400).json({message: "User not found"});
+    }
+    const {friendID} = req.body;
+    if (!friendID) {
+        return res.status(400).json({message: "All fields required"});
+    }
+    user.friendRequests.pull(friendID);
+    user.save();
+    res.status(201).json({message: `Friend request deleted`});
 });
 
 const addActiveGame = asyncHandler(async (req,res) => {
@@ -209,5 +230,5 @@ const acceptGameInvite = asyncHandler(async (req,res) => {
 
 });
 
-module.exports = {getMyData, getPublicUserData, createUser, updateUser, deleteUser, getAllFriends, addFriend, deleteFriend, 
+module.exports = {getMyData, getPublicUserData, getPrivateUserData, createUser, updateUser, deleteUser, getAllFriends, addFriend, deleteFriend, 
     getAllFriendRequests, sendFriendRequest, deleteFriendRequest}

@@ -62,7 +62,6 @@ const createDobletInstance = asyncHandler(async (req,res) => {
     }
     gameInstance.players.addToSet(player1);
     gameInstance.save();
-    // server = wss.init();
     res.status(201).json({message: `New game instance created`, id: gameInstance.id});
 });
 
@@ -83,7 +82,6 @@ const deleteDobletInstance = asyncHandler(async (req,res) => {
 
 const getAllData = asyncHandler(async (req,res) => {
     const id = req.params.instance;
-    // console.log(req.params.instance)
     if (!id) {
         return res.status(400).json({message: "Game ID required"});
     }
@@ -109,7 +107,6 @@ const loadGame = asyncHandler(async (req,res) => {
 const play = asyncHandler(async (req,res) => {
     const io = require('../../server')
     const id = req.params.instance;
-    // io.to(id).emit('game-update', "Hello")
     if (!id) {
         return res.status(400).json({message: "Game ID required"});
     }
@@ -122,14 +119,8 @@ const play = asyncHandler(async (req,res) => {
     }
     let gameModel = new Doblet(game.id, game.players[0], game.players[1], game.currentPlayer, game.board)
     gameModel.takeTurn();
-    const updatedGame = await GameInstance.findByIdAndUpdate(id, {"currentPlayer": gameModel.currentPlayer, "board": gameModel.board, "players": [gameModel.player1, gameModel.player2]}, {new: true});
-    // const update = async() => {
-    //     sendMessage(game.id, 'game-update', {board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, winner: gameModel.winner});
-    // }
-    // await update();
-    console.log(`sendingmessage to ${game.id.toString()}`);
-    // sendMessage(game.id.toString(), 'game-update', "Hello");
-    console.log(io.rooms);
+    const updatedGame = await GameInstance.findByIdAndUpdate(id, 
+        {"currentPlayer": gameModel.currentPlayer, "board": gameModel.board, "players": [gameModel.player1, gameModel.player2]}, {new: true});
     const room = game.id;
     io.to(room).emit('game-update', {board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, winner: gameModel.winner})
     if (gameModel.winner) {

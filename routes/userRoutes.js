@@ -10,13 +10,16 @@ const ownUser = require('../middleware/ownUser');
 router.route('/')
     .get(verifyJWT,controller.getMyData)
     .post(controller.createUser)
-    .patch(verifyJWT, controller.updateUser)
-    .delete(verifyJWT, controller.deleteUser)
 
 router.use(verifyJWT);
 
 router.route('/:userid')
     .get(controller.getPublicUserData)
+    .patch(ownUser, controller.updateUser)
+    .delete(ownUser, controller.deleteUser)
+
+router.route('/:userid/private')
+    .get(controller.getPrivateUserData)
 
 router.route('/:userid/friends')
     .get(ownUser, controller.getAllFriends)
