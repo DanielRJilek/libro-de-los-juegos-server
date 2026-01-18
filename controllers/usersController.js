@@ -171,7 +171,7 @@ const sendFriendRequest = asyncHandler(async (req,res) => {
     }
     const {username} = req.body;
     const friendID = await User.find({username}).select("_id").exec();
-    console.log(friendID);
+    // console.log(friendID);
     if (!friendID) {
         return res.status(400).json({message: "All fields required"});
     }

@@ -6,11 +6,11 @@ const Player = require('./Player');
 
 class Doblet {
     constructor(id, player1, player2, currentPlayer, board) {
-        console.log(`player1: ${player1}`)
-        console.log(`player1.username: ${player1.username}`)
+        // console.log(`player1: ${player1}`)
+        // console.log(`player1.username: ${player1.username}`)
         this.id = id;
         this.player1 = player1;
-        console.log(`this.player1:${this.player1}`)
+        // console.log(`this.player1:${this.player1}`)
         this.player2 = player2;
         this.board = board;
         this.winner = null;
@@ -25,8 +25,8 @@ class Doblet {
             // this.otherPlayer = this.player1 ? this.currentPlayer == this.player2 : this.player2;
             this.otherPlayer = this.player1;
         }
-        console.log(`model player1: ${this.player1}`);
-        console.log(`model player2: ${this.player2}`);
+        // console.log(`model player1: ${this.player1}`);
+        // console.log(`model player2: ${this.player2}`);
     }
 
     setup() {}
@@ -146,7 +146,7 @@ class Doblet {
 
     takeTurn() {
         const dice = this.rollDice(3);
-        console.log(`dice: ${dice}`);
+        // console.log(`dice: ${dice}`);
         for (let i=0; i<3; i++) {
             if (this.canMove(this.currentPlayer, dice[i]-1) == true) {
                 if (this.allPlayedDown(this.currentPlayer)) {

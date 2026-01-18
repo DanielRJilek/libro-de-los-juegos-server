@@ -4,7 +4,7 @@ const GameInstance = require('../../models/GameInstance');
 const User = require('../../models/User');
 const Doblet = require('./Doblet');
 const Game = require('../../models/Game');
-const {sendMessage} = require('../../server')
+const {v4: uuidV4} = require('uuid');
 
 
 function startingPlayer(player1, player2) {
@@ -107,30 +107,31 @@ const loadGame = asyncHandler(async (req,res) => {
 });
 
 const play = asyncHandler(async (req,res) => {
+    const io = require('../../server')
     const id = req.params.instance;
+    // io.to(id).emit('game-update', "Hello")
     if (!id) {
         return res.status(400).json({message: "Game ID required"});
     }
     const game = await GameInstance.findById(id).exec();
     if (!game) {
         return res.status(400).json({message: "Game instance not found"});
-    }
+    } 
     if (game.currentPlayer.id != req.user.id) {
         return res.status(403).json({message: "Forbidden"});
     }
-    // console.log(game.currentPlayer)
-    console.log(game.players);
     let gameModel = new Doblet(game.id, game.players[0], game.players[1], game.currentPlayer, game.board)
     gameModel.takeTurn();
-    console.log(`Current player in model after turn: ${gameModel.currentPlayer.username}`);
     const updatedGame = await GameInstance.findByIdAndUpdate(id, {"currentPlayer": gameModel.currentPlayer, "board": gameModel.board, "players": [gameModel.player1, gameModel.player2]}, {new: true});
-    // console.log(wss);
-    // wss.broadcast(updatedGame);
-    // game.markModified('currentPlayer');
-    // await game.save();
-    const update = async() => {
-        sendMessage(game.board);
-    }
+    // const update = async() => {
+    //     sendMessage(game.id, 'game-update', {board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, winner: gameModel.winner});
+    // }
+    // await update();
+    console.log(`sendingmessage to ${game.id.toString()}`);
+    // sendMessage(game.id.toString(), 'game-update', "Hello");
+    console.log(io.rooms);
+    const room = game.id;
+    io.to(room).emit('game-update', {board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, winner: gameModel.winner})
     if (gameModel.winner) {
         res.status(201).json({message: `New board state: ${updatedGame.board}`, board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, winner: gameModel.winner});
     }
