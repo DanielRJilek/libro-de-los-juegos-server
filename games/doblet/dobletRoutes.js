@@ -8,7 +8,7 @@ const isPlayer = require('../../middleware/isPlayer');
 
 router.use(verifyJWT)
 
-// '.com/games/doblet
+// '.com/games/doblet/table
 router.route('/')
     .post(controller.createDobletInstance)
     .delete(controller.deleteDobletInstance)

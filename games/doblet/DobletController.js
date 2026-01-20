@@ -4,8 +4,6 @@ const GameInstance = require('../../models/GameInstance');
 const User = require('../../models/User');
 const Doblet = require('./Doblet');
 const Game = require('../../models/Game');
-const {v4: uuidV4} = require('uuid');
-
 
 function startingPlayer(player1, player2) {
     player1Roll = Math.random() * (6-1) + 1;
@@ -21,28 +19,57 @@ function setCurrentPlayer(player) {
     otherPlayer = player1 ? currentPlayer == player2 : player2;
 }
 
+// move to generic gameController
 const addPlayer = asyncHandler(async (req,res) => {
-    const {username} = req.body;
+    const userID = req.user.id;
     const gameID = req.params.instance;
+    console.log(`userid: ${userID}`);
+    console.log(`instance: ${gameID}`);
     const gameInstance = await GameInstance.findById(gameID).exec();
+    
     if (!gameInstance) {
         return res.status(400).json({message: "Game instance not found"});
     }
-    const newPlayer = await User.findOne({username}).exec();
+    const newPlayer = await User.findOne({_id: userID}).exec();
     if (!newPlayer) {
         return res.status(400).json({message: "User not found"});
     }
-    const inGame = await GameInstance.find({    _id: gameID,
-                                                players: {"$in": newPlayer.id}})
+    const inGame = await GameInstance.find({_id: gameID,
+                                            players: {"$in": newPlayer.id}})
     if (inGame.length != 0) {
         return res.status(409).json({message: "Player already in game"});
     }
+    const requested = await User.find({ _id: userID,
+                                        "invites.game_id": gameID})
+    if (requested.length == 0) {
+        return res.status(409).json({message: "User has not received a game invite from the other user"});
+    }
+    const owner = await User.findById(gameInstance.owner).select('username');
     gameInstance.players.addToSet({ "id": newPlayer.id,
                                     "phase": 1,
                                     "username": newPlayer.username
     });
     gameInstance.save();
-    res.status(201).json({message: `Player ${username} added to game instance ${gameID}`});
+    const activeGame = {_id: gameInstance.id, owner: owner, title: gameInstance.title};
+    const result = await User.updateOne(
+        { _id: userID }, 
+        { $pull: { invites: {game_id: gameID }}},
+        {new: true}
+    )
+    newPlayer.activeGames.addToSet(activeGame);
+    newPlayer.save();
+    if (!result) {
+        return res.status(400).json({message: "Could not accept invite."});
+    }
+    // console.log(newPlayer.username)
+    // console.log(newPlayer.invites)
+    // newPlayer.invites.pull({game_id: gameID.toString()})
+    // newPlayer.markModified('invites.game_id');
+    // newPlayer.save();
+    // newPlayer.invites.pull(requested);
+    // newPlayer.activeGames.push(inGame);
+    
+    res.status(201).json({message: `Player ${newPlayer.username} added to game instance ${gameID}`});
 });
 
 // for now automatically makes the host player1, later implement the players rolling for first
@@ -51,7 +78,9 @@ const createDobletInstance = asyncHandler(async (req,res) => {
     const user1 = await User.findById(id1).select('username');
     const dobletObject = {  "owner": id1,
                             "board": [[2,0,0,2], [2,0,0,2], [2,0,0,2], [2,0,0,2], [2,0,0,2], [2,0,0,2]],
-                            "currentPlayer":{"id": id1, "username": user1.username}};
+                            "currentPlayer":{"id": id1, "username": user1.username},
+                            "title": "doblet"
+                        };
     const gameInstance = await GameInstance.create(dobletObject);
     if (!gameInstance) {
         res.status(400).json({message: "Error 400"});

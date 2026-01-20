@@ -31,4 +31,9 @@ router.route('/:userid/friends/requests')
     .post(ownUser, controller.sendFriendRequest)
     .delete(ownUser, controller.deleteFriendRequest)
 
+router.route('/:userid/friends/invites')
+    .get(ownUser, controller.getAllInvites)
+    .post(ownUser, controller.sendInvite)
+    .delete(ownUser, controller.deleteInvite)
+
 module.exports = router;

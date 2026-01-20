@@ -1,6 +1,8 @@
 const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
+const Game = require('../models/Game');
+const GameInstance = require('../models/GameInstance');
 
 const getMyData = asyncHandler(async (req,res) => {
     const {id} = req.user;
@@ -222,13 +224,70 @@ const deleteFriendRequest = asyncHandler(async (req,res) => {
     res.status(201).json({message: `Friend request deleted`});
 });
 
+const getAllInvites = asyncHandler(async (req,res) => {
+    const id = req.user.id;
+    const user = await User.findById(id).exec();
+    if (!user) {
+        return res.status(400).json({message: "User not found"});
+    }
+    res.json(user.invites);
+});
+
+const sendInvite = asyncHandler(async (req,res) => {
+    const id = req.user.id;
+    const user = await User.findById(id).exec();
+    if (!user) {
+        return res.status(400).json({message: "User not found"});
+    }
+    const {username, instance} = req.body;
+    const game_instance = await GameInstance.findById(instance).select('title');
+    const invite = {game_id: instance, title: game_instance.title, sender: {_id: id, username: user.username}};
+    const friendID = await User.find({username}).select("_id").exec();
+    if (!friendID) {
+        return res.status(400).json({message: "All fields required"});
+    }
+    if (friendID == id) {
+        return res.status(400).json({message: "Can't invite yourself"});
+    }
+    const inGame = await GameInstance.find({    _id: instance,
+                                                players: {"$in": friendID}})
+    if (inGame.length != 0) {
+        return res.status(409).json({message: "Already in game"});
+    }
+    const invites = await User.find({   _id: friendID,
+                                        invites: {"$in": invite}})
+    if (invites.length != 0) {
+        return res.status(409).json({message: "Invite already sent"});
+    }
+    const friend = await User.findById(friendID).exec();
+    if (!friend) {
+        return res.status(409).json({message: "Can't find user to invite"});
+    }
+    
+    friend.invites.addToSet(invite);
+    friend.save();
+    res.status(201).json({message: `Invite sent`});
+});
+
+const deleteInvite = asyncHandler(async (req,res) => {
+    const id = req.user.id;
+    const user = await User.findById(id).exec();
+    if (!user) {
+        return res.status(400).json({message: "User not found"});
+    }
+    const {invite} = req.body;
+    if (!invite) {
+        return res.status(400).json({message: "All fields required"});
+    }
+    user.invites.pull(invite);
+    user.save();
+    res.status(201).json({message: `Game invite deleted`});
+});
+
 const addActiveGame = asyncHandler(async (req,res) => {
 
 });
 
-const acceptGameInvite = asyncHandler(async (req,res) => {
-
-});
 
 module.exports = {getMyData, getPublicUserData, getPrivateUserData, createUser, updateUser, deleteUser, getAllFriends, addFriend, deleteFriend, 
-    getAllFriendRequests, sendFriendRequest, deleteFriendRequest}
+    getAllFriendRequests, sendFriendRequest, deleteFriendRequest, getAllInvites, sendInvite, deleteInvite}
