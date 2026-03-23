@@ -5,20 +5,20 @@ const jwt = require('jsonwebtoken');
 
 const login = asyncHandler(async (req, res) => {
     // authentication
-    if (req.body === undefined) {
-        return res.status(400).json({message: "All fields are required"})
-    }
+    // if (req.body === undefined) {
+    //     return res.status(400).json({message: "All fields are required"})
+    // }
     const {username, password} = req.body;
     if (!username || !password) {
         return res.status(400).json({message: "All fields are required"});
     }
     const user = await User.findOne({username}).exec();
     if (!user || !user.active) {
-        return res.status(401).json({message: "Unauthorized"})
+        return res.status(401).json({message: "Invalid username or password"})
     }
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
-        return res.status(401).json({message: "Unauthorized"});
+        return res.status(401).json({message: "Invalid username or password"});
     }
 
     // authorization

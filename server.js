@@ -4,10 +4,10 @@ const app = express();
 const path = require('path');
 const cors = require('cors');
 const corsOptions = require('./config/corsOptions');
-const PORT = process.env.PORT || 10000;
 const connectDB = require('./config/dbConn');
 const mongoose = require('mongoose');
 
+const PORT = process.env.PORT || 10000;
 connectDB();
 
 app.use(cors(corsOptions));

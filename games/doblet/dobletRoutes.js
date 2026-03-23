@@ -2,26 +2,27 @@
 
 const express = require('express');
 const router = express.Router();
-const controller = require('./DobletController');
+const dobletController = require('./DobletController');
+const gameInstanceController = require('../../controllers/gameInstanceController');
 const verifyJWT = require('../../middleware/verifyJWT');
 const isPlayer = require('../../middleware/isPlayer');
-
+    
 router.use(verifyJWT)
 
 // '.com/games/doblet/table
 router.route('/')
-    .post(controller.createDobletInstance)
-    .delete(controller.deleteDobletInstance)
+    .post(dobletController.createDobletInstance)
+    .delete(gameInstanceController.deleteGameInstance)
 
 router.use(isPlayer);
 
 router.route('/:instance')
-    .get(controller.getAllData)
+    .get(gameInstanceController.getAllData)
 
 router.route('/:instance/play')
-    .post(controller.play)
+    .post(dobletController.play)
 
 router.route('/:instance/players')
-    .post(controller.addPlayer)
+    .post(gameInstanceController.addPlayer)
 
 module.exports = router;

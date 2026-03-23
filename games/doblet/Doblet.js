@@ -2,15 +2,10 @@
 This represents the model of the game
 */
 
-const Player = require('./Player');
-
 class Doblet {
     constructor(id, player1, player2, currentPlayer, board) {
-        // console.log(`player1: ${player1}`)
-        // console.log(`player1.username: ${player1.username}`)
         this.id = id;
         this.player1 = player1;
-        // console.log(`this.player1:${this.player1}`)
         this.player2 = player2;
         this.board = board;
         this.winner = null;
@@ -25,8 +20,6 @@ class Doblet {
             // this.otherPlayer = this.player1 ? this.currentPlayer == this.player2 : this.player2;
             this.otherPlayer = this.player1;
         }
-        // console.log(`model player1: ${this.player1}`);
-        // console.log(`model player2: ${this.player2}`);
     }
 
     setup() {}
@@ -175,8 +168,6 @@ class Doblet {
             this.setCurrentPlayer(this.otherPlayer);
         }
     }
-
-
 }
 
 module.exports = Doblet;

@@ -5,8 +5,6 @@ const controller = require('../controllers/usersController');
 const verifyJWT = require('../middleware/verifyJWT');
 const ownUser = require('../middleware/ownUser');
 
-// router.use(verifyJWT);
-
 router.route('/')
     .get(verifyJWT,controller.getMyData)
     .post(controller.createUser)

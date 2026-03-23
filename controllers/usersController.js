@@ -35,17 +35,19 @@ const getPrivateUserData = asyncHandler(async (req,res) => {
 })
 
 const createUser = asyncHandler(async (req,res) => {
-    const {username, password} = req.body;
-    if (!username || !password) {
+    const {username, password1, password2} = req.body;
+    if (!username || !password1 || !password2) {
         return res.status(400).json({message: "All fields required"});
     }
-
+    if (password1 != password2) {
+        res.status(400).json({message: "Passwords must match"});
+    }
     const duplicate = await User.findOne({username}).lean().exec();
     if (duplicate) {
         return res.status(409).json({message: "Duplicate username"});
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password1, 10);
     const userObject = {"username": username, "password": hashedPassword, "activeGames": []};
     const user = await User.create(userObject);
     if (user) {
@@ -183,11 +185,11 @@ const sendFriendRequest = asyncHandler(async (req,res) => {
         return res.status(400).json({message: "User not found"});
     }
     const {username} = req.body;
-    const friendID = await User.find({username}).select("_id").exec();
+    const friendID = await User.findOne({username}).select("_id").exec();
     if (!friendID) {
         return res.status(400).json({message: "All fields required"});
     }
-    if (friendID == id) {
+    if (friendID._id.toString() == id) {
         return res.status(400).json({message: "Can't befriend yourself"});
     }
     const inFriendList = await User.find({    _id: id,
@@ -246,7 +248,7 @@ const sendInvite = asyncHandler(async (req,res) => {
     if (!friendID) {
         return res.status(400).json({message: "All fields required"});
     }
-    if (friendID == id) {
+    if (friendID._id.toString() == id) {
         return res.status(400).json({message: "Can't invite yourself"});
     }
     const inGame = await GameInstance.find({    _id: instance,
