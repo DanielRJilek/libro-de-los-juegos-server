@@ -32,6 +32,8 @@ const createDobletInstance = asyncHandler(async (req,res) => {
     }
     gameInstance.players.addToSet(player1);
     gameInstance.save();
+    user1.activeGames.push({id: gameInstance.id, title: gameInstance.title});
+    user1.save();
     res.status(201).json({message: `New game instance created`, id: gameInstance.id});
 });
 

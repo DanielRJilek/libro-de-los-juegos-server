@@ -244,7 +244,7 @@ const sendInvite = asyncHandler(async (req,res) => {
     const {username, instance} = req.body;
     const game_instance = await GameInstance.findById(instance).select('title');
     const invite = {game_id: instance, title: game_instance.title, sender: {_id: id, username: user.username}};
-    const friendID = await User.find({username}).select("_id").exec();
+    const friendID = await User.findOne({username}).select("_id").exec();
     if (!friendID) {
         return res.status(400).json({message: "All fields required"});
     }
