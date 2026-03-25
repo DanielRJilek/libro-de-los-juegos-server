@@ -25,4 +25,7 @@ router.route('/:instance/play')
 router.route('/:instance/players')
     .post(gameInstanceController.addPlayer)
 
+router.route('/:instance/start')
+    .post(gameInstanceController.startGame)
+
 module.exports = router;

@@ -4,10 +4,6 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
 const login = asyncHandler(async (req, res) => {
-    // authentication
-    // if (req.body === undefined) {
-    //     return res.status(400).json({message: "All fields are required"})
-    // }
     const {username, password} = req.body;
     if (!username || !password) {
         return res.status(400).json({message: "All fields are required"});

@@ -165,7 +165,9 @@ class Doblet {
             return;
         }
         else {
+            console.log(`current player: ${this.currentPlayer.username}, other player: ${this.otherPlayer.username}`);
             this.setCurrentPlayer(this.otherPlayer);
+            console.log(`current player: ${this.currentPlayer.username}, other player: ${this.otherPlayer.username}`);
         }
     }
 }

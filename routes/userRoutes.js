@@ -6,7 +6,7 @@ const verifyJWT = require('../middleware/verifyJWT');
 const ownUser = require('../middleware/ownUser');
 
 router.route('/')
-    .get(verifyJWT,controller.getMyData)
+    .get(verifyJWT, controller.getMyData)
     .post(controller.createUser)
 
 router.use(verifyJWT);

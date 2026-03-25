@@ -31,7 +31,8 @@ const getPrivateUserData = asyncHandler(async (req,res) => {
     }
     const friendRequests = await User.find({_id: {$in: user.friendRequests}}).select('username').exec();
     const friends = await User.find({_id: {$in: user.friends}}).select('username').exec();
-    res.json({id: user.id, username: user.username, friends: friends, friendRequests: friendRequests, invites: user.invites, activeGames: user.activeGames});
+    const activeGames = await GameInstance.find({_id: {$in: user.activeGames}}).exec();
+    res.json({id: user.id, username: user.username, friends: friends, friendRequests: friendRequests, invites: user.invites, activeGames: activeGames});
 })
 
 const createUser = asyncHandler(async (req,res) => {

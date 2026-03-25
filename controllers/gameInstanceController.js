@@ -8,10 +8,12 @@ const deleteGameInstance = asyncHandler(async (req,res) => {
     if (!id) {
         return res.status(400).json({message: "Game instance ID required"});
     }
-
     const gameInstance = await GameInstance.findById(id).exec();
     if (!gameInstance) {
         return res.status(400).json({message: "Game instance not found"});
+    }
+    if (gameInstance.owner != req.user.id) {
+        return res.status(403).json({message: "Forbidden"});
     }
     const result = await gameInstance.deleteOne();
     const reply = `Game instance with ID ${result.id} deleted`;
@@ -27,6 +29,17 @@ const getAllData = asyncHandler(async (req,res) => {
     if (!game) {
         return res.status(400).json({message: "Game instance not found"});
     }
+    if (!game.players.some(player => player._id == req.user.id)) {
+        return res.status(403).json({message: "Forbidden"});
+    }
+    for (let player of game.players) {
+        const user = await User.findById(player._id).select('username');
+        player.username = user.username;
+    }  
+    const owner = await User.findById(game.owner).exec();
+    console.log(owner);
+    game.owner = owner;
+
     res.json(game);
 });
 
@@ -38,6 +51,13 @@ const loadGame = asyncHandler(async (req,res) => {
     const game = await GameInstance.findById(id).exec();
     if (!game) {
         return res.status(400).json({message: "Game instance not found"});
+    }
+    if (!game.players.some(player => player._id == req.user.id)) {
+        return res.status(403).json({message: "Forbidden"});
+    }
+    for (let player of game.players) {
+        const user = await User.findById(player._id).select('username');
+        player.username = user.username;
     }
     return game;
 });
@@ -55,7 +75,7 @@ const addPlayer = asyncHandler(async (req,res) => {
         return res.status(400).json({message: "User not found"});
     }
     const inGame = await GameInstance.find({_id: gameID,
-                                            players: {"$in": newPlayer.id}})
+                                            players: {"$in": newPlayer._id}})
     if (inGame.length != 0) {
         return res.status(409).json({message: "Player already in game"});
     }
@@ -65,31 +85,37 @@ const addPlayer = asyncHandler(async (req,res) => {
         return res.status(409).json({message: "User has not received a game invite from the other user"});
     }
     const owner = await User.findById(gameInstance.owner).select('username');
-    gameInstance.players.addToSet({ "id": newPlayer.id,
+    gameInstance.players.addToSet({ "_id": newPlayer._id,
                                     "phase": 1,
                                     "username": newPlayer.username
     });
     gameInstance.save();
-    const activeGame = {_id: gameInstance.id, owner: owner, title: gameInstance.title};
     const result = await User.updateOne(
         { _id: userID }, 
         { $pull: { invites: {game_id: gameID }}},
         {new: true}
     )
-    newPlayer.activeGames.addToSet(activeGame);
+    newPlayer.activeGames.addToSet(gameInstance._id);
     newPlayer.save();
     if (!result) {
         return res.status(400).json({message: "Could not accept invite."});
     }
-    // console.log(newPlayer.username)
-    // console.log(newPlayer.invites)
-    // newPlayer.invites.pull({game_id: gameID.toString()})
-    // newPlayer.markModified('invites.game_id');
-    // newPlayer.save();
-    // newPlayer.invites.pull(requested);
-    // newPlayer.activeGames.push(inGame);
     
     res.status(201).json({message: `Player ${newPlayer.username} added to game instance ${gameID}`});
 });
 
-module.exports = { deleteGameInstance, getAllData, loadGame, addPlayer}
+const startGame = asyncHandler(async (req,res) => {
+    const gameID = req.params.instance;
+    const gameInstance = await GameInstance.findById(gameID).exec();
+    if (!gameInstance) {
+        return res.status(400).json({message: "Game instance not found"});
+    }
+    if (gameInstance.owner != req.user.id) {
+        return res.status(403).json({message: "Forbidden"});
+    }
+    gameInstance.started = true;
+    gameInstance.save();
+    res.status(201).json({message: `Game instance ${gameID} started`});
+});
+
+module.exports = { deleteGameInstance, getAllData, loadGame, addPlayer, startGame }
