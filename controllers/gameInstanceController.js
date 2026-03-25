@@ -4,7 +4,7 @@ const User = require('../models/User');
 const Game = require('../models/Game');
 
 const deleteGameInstance = asyncHandler(async (req,res) => {
-    const {id} = req.body;
+    const id = req.params.instance;
     if (!id) {
         return res.status(400).json({message: "Game instance ID required"});
     }
@@ -37,7 +37,6 @@ const getAllData = asyncHandler(async (req,res) => {
         player.username = user.username;
     }  
     const owner = await User.findById(game.owner).exec();
-    console.log(owner);
     game.owner = owner;
 
     res.json(game);

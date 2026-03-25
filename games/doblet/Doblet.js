@@ -10,7 +10,7 @@ class Doblet {
         this.board = board;
         this.winner = null;
         this.otherPlayer;
-        if (currentPlayer.id == this.player1.id) {
+        if (currentPlayer._id == this.player1._id) {
             this.currentPlayer = this.player1;
             // this.otherPlayer = this.player1 ? this.currentPlayer == this.player2 : this.player2;
             this.otherPlayer = this.player2;
@@ -138,8 +138,8 @@ class Doblet {
     }
 
     takeTurn() {
+        console.log(`current player: ${this.currentPlayer.username}, other player: ${this.otherPlayer.username}`);
         const dice = this.rollDice(3);
-        // console.log(`dice: ${dice}`);
         for (let i=0; i<3; i++) {
             if (this.canMove(this.currentPlayer, dice[i]-1) == true) {
                 if (this.allPlayedDown(this.currentPlayer)) {

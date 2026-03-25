@@ -12,12 +12,13 @@ router.use(verifyJWT)
 // '.com/games/doblet/table
 router.route('/')
     .post(dobletController.createDobletInstance)
-    .delete(gameInstanceController.deleteGameInstance)
+    
 
 router.use(isPlayer);
 
 router.route('/:instance')
     .get(gameInstanceController.getAllData)
+    .delete(gameInstanceController.deleteGameInstance)
 
 router.route('/:instance/play')
     .post(dobletController.play)

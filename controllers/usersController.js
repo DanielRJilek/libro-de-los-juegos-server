@@ -247,7 +247,7 @@ const sendInvite = asyncHandler(async (req,res) => {
     const invite = {game_id: instance, title: game_instance.title, sender: {_id: id, username: user.username}};
     const friendID = await User.findOne({username}).select("_id").exec();
     if (!friendID) {
-        return res.status(400).json({message: "All fields required"});
+        return res.status(400).json({message: "User not found"});
     }
     if (friendID._id.toString() == id) {
         return res.status(400).json({message: "Can't invite yourself"});

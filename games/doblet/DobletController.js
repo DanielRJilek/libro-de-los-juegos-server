@@ -35,7 +35,6 @@ const createDobletInstance = asyncHandler(async (req,res) => {
     gameInstance.save();
     user1.activeGames.addToSet(gameInstance._id);
     user1.save();
-    console.log(gameInstance);
     res.status(201).json({message: `New game instance created`, _id: gameInstance._id});
 });
 
@@ -59,7 +58,8 @@ const play = asyncHandler(async (req,res) => {
     const room = game._id;
     io.to(room).emit('game-update', {board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, winner: gameModel.winner})
     if (gameModel.winner) {
-        res.status(201).json({message: `New board state: ${updatedGame.board}`, board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, winner: gameModel.winner});
+        // res.status(201).json({message: `New board state: ${updatedGame.board}`, board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, winner: gameModel.winner});
+        io.to(room).emit('game-update', {board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, winner: gameModel.winner})
     }
     res.status(201).json({message: `New board state: ${updatedGame.board}`, board: updatedGame.board, currentPlayer: updatedGame.currentPlayer});
 });
