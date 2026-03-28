@@ -7,6 +7,9 @@ const gameInstanceSchema = new mongoose.Schema({
     players : {
         type: Array
     },
+    invites: {
+        type: Array
+    },
     started : {
         type: Boolean,
         default: false

@@ -4,15 +4,6 @@ const User = require('../../models/User');
 const Doblet = require('./Doblet');
 const Game = require('../../models/Game');
 
-function startingPlayer(player1, player2) {
-    player1Roll = Math.random() * (6-1) + 1;
-    player2Roll = Math.random() * (6-1) + 1;
-    if (player1Roll == player2Roll) {
-        return startingPlayer(player1,player2)
-    }
-    return player1 ? player1Roll > player2Roll : player2;
-}
-
 // for now automatically makes the host player1, later implement the players rolling for first
 const createDobletInstance = asyncHandler(async (req,res) => {
     const id1 = req.user.id;
@@ -21,7 +12,9 @@ const createDobletInstance = asyncHandler(async (req,res) => {
                             "board": [[2,0,0,2], [2,0,0,2], [2,0,0,2], [2,0,0,2], [2,0,0,2], [2,0,0,2]],
                             "currentPlayer":{"_id": id1, "username": user1.username},
                             "title": "doblet",
-                            "started": false
+                            "started": false,
+                            "invites": [],
+                            "players": [],
                         };
     const gameInstance = await GameInstance.create(dobletObject);
     if (!gameInstance) {

@@ -243,7 +243,7 @@ const sendInvite = asyncHandler(async (req,res) => {
         return res.status(400).json({message: "User not found"});
     }
     const {username, instance} = req.body;
-    const game_instance = await GameInstance.findById(instance).select('title');
+    const game_instance = await GameInstance.findById(instance).exec();
     const invite = {game_id: instance, title: game_instance.title, sender: {_id: id, username: user.username}};
     const friendID = await User.findOne({username}).select("_id").exec();
     if (!friendID) {
@@ -266,7 +266,9 @@ const sendInvite = asyncHandler(async (req,res) => {
     if (!friend) {
         return res.status(409).json({message: "Can't find user to invite"});
     }
-    
+    console.log(game_instance);
+    game_instance.invites.addToSet({_id: friendID, username: friend.username});
+    game_instance.save();
     friend.invites.addToSet(invite);
     friend.save();
     res.status(201).json({message: `Invite sent`});
