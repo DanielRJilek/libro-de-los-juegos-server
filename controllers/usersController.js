@@ -233,6 +233,10 @@ const getAllInvites = asyncHandler(async (req,res) => {
     if (!user) {
         return res.status(400).json({message: "User not found"});
     }
+    for (let invite of user.invites) {
+        const game = await GameInstance.findById(invite.table._id).exec();
+        invite.table = game;
+    }
     res.json(user.invites);
 });
 
@@ -244,30 +248,25 @@ const sendInvite = asyncHandler(async (req,res) => {
     }
     const {username, instance} = req.body;
     const game_instance = await GameInstance.findById(instance).exec();
-    const invite = {game_id: instance, title: game_instance.title, sender: {_id: id, username: user.username}};
-    const friendID = await User.findOne({username}).select("_id").exec();
-    if (!friendID) {
+    const invite = {table: {_id: instance, title: game_instance.title},  sender: {_id: id, username: user.username}};
+    const friend = await User.findOne({username}).exec();
+    if (!friend) {
         return res.status(400).json({message: "User not found"});
     }
-    if (friendID._id.toString() == id) {
+    if (friend._id.toString() == id) {
         return res.status(400).json({message: "Can't invite yourself"});
     }
     const inGame = await GameInstance.find({    _id: instance,
-                                                players: {"$in": friendID}})
+                                                players: {"$in": friend}})
     if (inGame.length != 0) {
         return res.status(409).json({message: "Already in game"});
     }
-    const invites = await User.find({   _id: friendID,
+    const invites = await User.find({   _id: friend._id,
                                         invites: {"$in": invite}})
     if (invites.length != 0) {
         return res.status(409).json({message: "Invite already sent"});
     }
-    const friend = await User.findById(friendID).exec();
-    if (!friend) {
-        return res.status(409).json({message: "Can't find user to invite"});
-    }
-    console.log(game_instance);
-    game_instance.invites.addToSet({_id: friendID, username: friend.username});
+    game_instance.invites.addToSet({_id: friend._id.toString(), username: friend.username});
     game_instance.save();
     friend.invites.addToSet(invite);
     friend.save();

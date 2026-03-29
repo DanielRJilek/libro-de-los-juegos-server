@@ -15,6 +15,11 @@ const deleteGameInstance = asyncHandler(async (req,res) => {
     if (gameInstance.owner != req.user.id) {
         return res.status(403).json({message: "Forbidden"});
     }
+    const users = await User.find({activeGames: id}).exec();
+    for (let user of users) {
+        user.activeGames.pull(id);
+        user.save();
+    }
     const result = await gameInstance.deleteOne();
     const reply = `Game instance with ID ${result.id} deleted`;
     res.json(reply);
@@ -63,8 +68,8 @@ const loadGame = asyncHandler(async (req,res) => {
 
 const addPlayer = asyncHandler(async (req,res) => {
     const userID = req.user.id;
-    const gameID = req.params.instance;
-    const gameInstance = await GameInstance.findById(gameID).exec();
+    const tableID = req.params.instance;
+    const gameInstance = await GameInstance.findById(tableID).exec();
     
     if (!gameInstance) {
         return res.status(400).json({message: "Game instance not found"});
@@ -73,13 +78,13 @@ const addPlayer = asyncHandler(async (req,res) => {
     if (!newPlayer) {
         return res.status(400).json({message: "User not found"});
     }
-    const inGame = await GameInstance.find({_id: gameID,
-                                            players: {"$in": newPlayer._id}})
+    const inGame = await GameInstance.find({_id: tableID,
+                                            players: {"$in": newPlayer._id}}).exec();
     if (inGame.length != 0) {
         return res.status(409).json({message: "Player already in game"});
     }
     const requested = await User.find({ _id: userID,
-                                        "invites.game_id": gameID})
+                                        "invites.table._id": tableID}).exec();
     if (requested.length == 0) {
         return res.status(409).json({message: "User has not received a game invite from the other user"});
     }
@@ -88,33 +93,35 @@ const addPlayer = asyncHandler(async (req,res) => {
                                     "phase": 1,
                                     "username": newPlayer.username
     });
-    gameInstance.save();
-    const result = await User.updateOne(
-        { _id: userID }, 
-        { $pull: { invites: {game_id: gameID }}},
-        {new: true}
-    )
-    newPlayer.activeGames.addToSet(gameInstance._id);
-    newPlayer.save();
-    if (!result) {
-        return res.status(400).json({message: "Could not accept invite."});
-    }
     
-    res.status(201).json({message: `Player ${newPlayer.username} added to game instance ${gameID}`});
+    await GameInstance.updateOne(
+        { _id: tableID },
+        { $pull: { invites: { _id: newPlayer._id.toString() } } }
+    );
+    
+    await User.updateOne(
+        { _id: userID },
+        { $pull: { invites: { 'table._id': tableID } } }
+    );
+    
+    newPlayer.activeGames.addToSet(gameInstance._id);
+    await newPlayer.save();
+    
+    res.status(201).json({message: `Player ${newPlayer.username} added to game instance ${tableID}`});
 });
 
 const startGame = asyncHandler(async (req,res) => {
-    const gameID = req.params.instance;
-    const gameInstance = await GameInstance.findById(gameID).exec();
+    const tableID = req.params.instance;
+    const gameInstance = await GameInstance.findById(tableID).exec();
     if (!gameInstance) {
         return res.status(400).json({message: "Game instance not found"});
     }
-    if (gameInstance.owner != req.user.id) {
+    if (gameInstance.owner._id.toString() != req.user.id) {
         return res.status(403).json({message: "Forbidden"});
     }
     gameInstance.started = true;
     gameInstance.save();
-    res.status(201).json({message: `Game instance ${gameID} started`});
+    res.status(201).json({message: `Game instance ${tableID} started`});
 });
 
 module.exports = { deleteGameInstance, getAllData, loadGame, addPlayer, startGame }
