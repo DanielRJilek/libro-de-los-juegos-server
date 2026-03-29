@@ -41,7 +41,7 @@ const createUser = asyncHandler(async (req,res) => {
         return res.status(400).json({message: "All fields required"});
     }
     if (password1 != password2) {
-        res.status(400).json({message: "Passwords must match"});
+        return res.status(400).json({message: "Passwords must match"});
     }
     const duplicate = await User.findOne({username}).lean().exec();
     if (duplicate) {
