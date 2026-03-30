@@ -34,7 +34,8 @@ const getAllData = asyncHandler(async (req,res) => {
     if (!game) {
         return res.status(400).json({message: "Game instance not found"});
     }
-    if (!game.players.some(player => player._id == req.user.id)) {
+    if (!game.players.some(player => player._id.toString() == req.user.id)) {
+        console.log(game.players);
         return res.status(403).json({message: "Forbidden"});
     }
     for (let player of game.players) {
@@ -56,7 +57,7 @@ const loadGame = asyncHandler(async (req,res) => {
     if (!game) {
         return res.status(400).json({message: "Game instance not found"});
     }
-    if (!game.players.some(player => player._id == req.user.id)) {
+    if (!game.players.some(player => player._id.toString() == req.user.id)) {
         return res.status(403).json({message: "Forbidden"});
     }
     for (let player of game.players) {
@@ -93,19 +94,22 @@ const addPlayer = asyncHandler(async (req,res) => {
                                     "phase": 1,
                                     "username": newPlayer.username
     });
+    gameInstance.invites.pull({_id: newPlayer._id.toString(), username: newPlayer.username});
+    await gameInstance.save();
     
-    await GameInstance.updateOne(
-        { _id: tableID },
-        { $pull: { invites: { _id: newPlayer._id.toString() } } }
-    );
+    // await GameInstance.updateOne(
+    //     { _id: tableID },
+    //     { $pull: { invites: { _id: newPlayer._id.toString() } } }
+    // );
     
-    await User.updateOne(
-        { _id: userID },
-        { $pull: { invites: { 'table._id': tableID } } }
-    );
-    
+    // await User.updateOne(
+    //     { _id: userID },
+    //     { $pull: { invites: { 'table._id': tableID } } }
+    // );
+    newPlayer.invites.pull({ 'table._id': tableID });
     newPlayer.activeGames.addToSet(gameInstance._id);
     await newPlayer.save();
+    await gameInstance.save();
     
     res.status(201).json({message: `Player ${newPlayer.username} added to game instance ${tableID}`});
 });

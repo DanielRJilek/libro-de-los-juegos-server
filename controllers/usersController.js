@@ -247,6 +247,7 @@ const sendInvite = asyncHandler(async (req,res) => {
         return res.status(400).json({message: "User not found"});
     }
     const {username, instance} = req.body;
+    console.log(instance);
     const game_instance = await GameInstance.findById(instance).exec();
     const invite = {table: {_id: instance, title: game_instance.title},  sender: {_id: id, username: user.username}};
     const friend = await User.findOne({username}).exec();
