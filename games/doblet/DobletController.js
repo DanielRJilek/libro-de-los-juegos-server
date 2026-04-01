@@ -48,7 +48,7 @@ const play = asyncHandler(async (req,res) => {
     gameModel.takeTurn();
     const updatedGame = await GameInstance.findByIdAndUpdate(id, 
         {"currentPlayer": gameModel.currentPlayer, "board": gameModel.board, "players": [gameModel.player1, gameModel.player2]}, {new: true});
-    const room = game._id;
+    const room = id;
     console.log(gameModel.dice);
     io.to(room).emit('game-update', {board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, dice: gameModel.dice, winner: gameModel.winner})
     if (gameModel.winner) {
