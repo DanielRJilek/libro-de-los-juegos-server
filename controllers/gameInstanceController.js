@@ -15,11 +15,7 @@ const deleteGameInstance = asyncHandler(async (req,res) => {
     if (gameInstance.owner != req.user.id) {
         return res.status(403).json({message: "Forbidden"});
     }
-    const users = await User.find({activeGames: id}).exec();
-    for (let user of users) {
-        user.activeGames.pull(id);
-        user.save();
-    }
+    await User.updateMany({ activeGames: id }, { $pull: { activeGames: id } });
     const result = await gameInstance.deleteOne();
     const reply = `Game instance with ID ${result.id} deleted`;
     res.json(reply);
@@ -35,7 +31,6 @@ const getAllData = asyncHandler(async (req,res) => {
         return res.status(400).json({message: "Game instance not found"});
     }
     if (!game.players.some(player => player._id.toString() == req.user.id)) {
-        console.log(game.players);
         return res.status(403).json({message: "Forbidden"});
     }
     for (let player of game.players) {
@@ -97,19 +92,16 @@ const addPlayer = asyncHandler(async (req,res) => {
     gameInstance.invites.pull({_id: newPlayer._id.toString(), username: newPlayer.username});
     await gameInstance.save();
     
-    // await GameInstance.updateOne(
-    //     { _id: tableID },
-    //     { $pull: { invites: { _id: newPlayer._id.toString() } } }
-    // );
-    
     // await User.updateOne(
     //     { _id: userID },
-    //     { $pull: { invites: { 'table._id': tableID } } }
-    // );
-    newPlayer.invites.pull({ 'table._id': tableID });
+    //     {
+    //         $pull: { invites: { 'table._id': tableID } },
+    //         $addToSet: { activeGames: gameInstance._id }
+    //     }
+    // ).exec();
+    newPlayer.invites.pull({table: {_id: tableID, title: gameInstance.title}, sender: {_id: gameInstance.owner, username: owner.username}});
     newPlayer.activeGames.addToSet(gameInstance._id);
     await newPlayer.save();
-    await gameInstance.save();
     
     res.status(201).json({message: `Player ${newPlayer.username} added to game instance ${tableID}`});
 });
@@ -120,7 +112,7 @@ const startGame = asyncHandler(async (req,res) => {
     if (!gameInstance) {
         return res.status(400).json({message: "Game instance not found"});
     }
-    if (gameInstance.owner._id.toString() != req.user.id) {
+    if (gameInstance.owner != req.user.id) {
         return res.status(403).json({message: "Forbidden"});
     }
     gameInstance.started = true;
