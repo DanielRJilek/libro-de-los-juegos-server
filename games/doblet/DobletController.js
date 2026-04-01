@@ -49,12 +49,15 @@ const play = asyncHandler(async (req,res) => {
     const updatedGame = await GameInstance.findByIdAndUpdate(id, 
         {"currentPlayer": gameModel.currentPlayer, "board": gameModel.board, "players": [gameModel.player1, gameModel.player2]}, {new: true});
     const room = game._id;
-    io.to(room).emit('game-update', {board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, winner: gameModel.winner})
+    console.log(gameModel.dice);
+    io.to(room).emit('game-update', {board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, dice: gameModel.dice, winner: gameModel.winner})
     if (gameModel.winner) {
         // res.status(201).json({message: `New board state: ${updatedGame.board}`, board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, winner: gameModel.winner});
-        io.to(room).emit('game-update', {board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, winner: gameModel.winner})
+        io.to(room).emit('game-update', {board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, 
+            dice: gameModel.dice, winner: gameModel.winner})
     }
-    res.status(201).json({message: `New board state: ${updatedGame.board}`, board: updatedGame.board, currentPlayer: updatedGame.currentPlayer});
+    res.status(201).json({message: `New board state: ${updatedGame.board}`, board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, 
+        dice: gameModel.dice});
 });
 
 module.exports = { createDobletInstance, play}

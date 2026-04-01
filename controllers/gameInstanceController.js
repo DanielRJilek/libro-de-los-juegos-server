@@ -63,6 +63,7 @@ const loadGame = asyncHandler(async (req,res) => {
 });
 
 const addPlayer = asyncHandler(async (req,res) => {
+    const io = require('../server')
     const userID = req.user.id;
     const tableID = req.params.instance;
     const gameInstance = await GameInstance.findById(tableID).exec();
@@ -107,6 +108,7 @@ const addPlayer = asyncHandler(async (req,res) => {
 });
 
 const startGame = asyncHandler(async (req,res) => {
+    const io = require('../server')
     const tableID = req.params.instance;
     const gameInstance = await GameInstance.findById(tableID).exec();
     if (!gameInstance) {
@@ -117,6 +119,7 @@ const startGame = asyncHandler(async (req,res) => {
     }
     gameInstance.started = true;
     gameInstance.save();
+    io.to(tableID).emit('game-start', {message: `Game instance ${tableID} started`});
     res.status(201).json({message: `Game instance ${tableID} started`});
 });
 

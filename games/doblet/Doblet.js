@@ -10,6 +10,7 @@ class Doblet {
         this.board = board;
         this.winner = null;
         this.otherPlayer;
+        this.dice;
         if (currentPlayer._id == this.player1._id) {
             this.currentPlayer = this.player1;
             // this.otherPlayer = this.player1 ? this.currentPlayer == this.player2 : this.player2;
@@ -139,9 +140,9 @@ class Doblet {
 
     takeTurn() {
         console.log(`current player: ${this.currentPlayer.username}, other player: ${this.otherPlayer.username}`);
-        const dice = this.rollDice(3);
+        this.dice = this.rollDice(3);
         for (let i=0; i<3; i++) {
-            if (this.canMove(this.currentPlayer, dice[i]-1) == true) {
+            if (this.canMove(this.currentPlayer, this.dice[i]-1) == true) {
                 if (this.allPlayedDown(this.currentPlayer)) {
                     this.currentPlayer.phase = 2;
                 }
@@ -151,7 +152,7 @@ class Doblet {
             }
             else {
                 // other player gets to use the move if possible
-                if (this.canMove(this.otherPlayer, dice[i]-1) == true) {
+                if (this.canMove(this.otherPlayer, this.dice[i]-1) == true) {
                     if (this.allPlayedDown(this.otherPlayer)) {
                         this.otherPlayer.phase = 2;
                     }
