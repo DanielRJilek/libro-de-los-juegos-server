@@ -92,18 +92,10 @@ const addPlayer = asyncHandler(async (req,res) => {
     });
     gameInstance.invites.pull({_id: newPlayer._id.toString(), username: newPlayer.username});
     await gameInstance.save();
-    
-    // await User.updateOne(
-    //     { _id: userID },
-    //     {
-    //         $pull: { invites: { 'table._id': tableID } },
-    //         $addToSet: { activeGames: gameInstance._id }
-    //     }
-    // ).exec();
     newPlayer.invites.pull({table: {_id: tableID, title: gameInstance.title}, sender: {_id: gameInstance.owner, username: owner.username}});
     newPlayer.activeGames.addToSet(gameInstance._id);
     await newPlayer.save();
-    
+    io.to(tableID).emit('player-joined', {message: `Player ${newPlayer.username} joined game instance ${tableID}`});
     res.status(201).json({message: `Player ${newPlayer.username} added to game instance ${tableID}`});
 });
 
