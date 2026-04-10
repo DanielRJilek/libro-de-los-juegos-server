@@ -187,9 +187,12 @@ const sendFriendRequest = asyncHandler(async (req,res) => {
         return res.status(400).json({message: "User not found"});
     }
     const {username} = req.body;
+    if (!username) {
+        return res.status(400).json({message: "All fields required"});
+    }
     const friendID = await User.findOne({username}).select("_id").exec();
     if (!friendID) {
-        return res.status(400).json({message: "All fields required"});
+        return res.status(400).json({message: "No user found with that username"});
     }
     if (friendID._id.toString() == id) {
         return res.status(400).json({message: "Can't befriend yourself"});
