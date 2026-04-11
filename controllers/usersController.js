@@ -16,11 +16,12 @@ const getMyData = asyncHandler(async (req,res) => {
 // For now just username. Later add profile pic, etc
 const getPublicUserData = asyncHandler(async (req,res) => {
     const id = req.params.userid;
-    const user = await User.findById(id).select('username');
+    const user = await User.findById(id);
     if (!user) {
         return res.status(400).json({message: "No user found"});
     }
-    res.json(user);
+    const friendCount = user.friends.length;
+    res.json({id: user.id, username: user.username, friendCount: friendCount});
 })
 
 const getPrivateUserData = asyncHandler(async (req,res) => {
