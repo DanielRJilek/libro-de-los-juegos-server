@@ -13,7 +13,6 @@ const getMyData = asyncHandler(async (req,res) => {
     res.json(user);
 });
 
-// For now just username. Later add profile pic, etc
 const getPublicUserData = asyncHandler(async (req,res) => {
     const id = req.params.userid;
     const user = await User.findById(id);
@@ -21,7 +20,7 @@ const getPublicUserData = asyncHandler(async (req,res) => {
         return res.status(400).json({message: "No user found"});
     }
     const friendCount = user.friends.length;
-    res.json({id: user.id, username: user.username, friendCount: friendCount});
+    res.json({id: user.id, username: user.username, friendCount: friendCount, profilePic: user.profilePic});
 })
 
 const getPrivateUserData = asyncHandler(async (req,res) => {
@@ -34,7 +33,7 @@ const getPrivateUserData = asyncHandler(async (req,res) => {
     const friends = await User.find({_id: {$in: user.friends}}).select('username').exec();
     const activeGames = await GameInstance.find({_id: {$in: user.activeGames}}).exec();
     res.json({id: user.id, username: user.username, friends: friends, 
-        friendRequests: friendRequests, invites: user.invites, activeGames: activeGames});
+        friendRequests: friendRequests, invites: user.invites, activeGames: activeGames, profilePic: user.profilePic});
 })
 
 const createUser = asyncHandler(async (req,res) => {
@@ -51,7 +50,7 @@ const createUser = asyncHandler(async (req,res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password1, 10);
-    const userObject = {"username": username, "password": hashedPassword, "activeGames": []};
+    const userObject = {"username": username, "password": hashedPassword, "activeGames": [], "profilePic": "/images/fil.png"};
     const user = await User.create(userObject);
     if (user) {
         res.status(201).json({message: `New user ${username} created`});
