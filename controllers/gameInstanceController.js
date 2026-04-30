@@ -34,8 +34,10 @@ const getAllData = asyncHandler(async (req,res) => {
         return res.status(403).json({message: "Forbidden"});
     }
     for (let player of game.players) {
-        const user = await User.findById(player._id).select('username');
+        const user = await User.findById(player._id);
         player.username = user.username;
+        player.profilePic = user.profilePic;
+        player._id = user._id;
     }  
     const owner = await User.findById(game.owner).exec();
     game.owner = owner;

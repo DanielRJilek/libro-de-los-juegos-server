@@ -1,5 +1,11 @@
 const mongoose = require('mongoose');
 
+const friendSchema = new mongoose.Schema({
+    _id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    username: { type: String, required: true },
+    icon: String
+}, { _id: false });
+
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
@@ -17,16 +23,16 @@ const userSchema = new mongoose.Schema({
        type: String
     },
     friends: {
-        type: Array
+        type: [friendSchema]
     },
     friendRequests: {
-        type: Array
+        type: [friendSchema]
     },
     activeGames: {
         type: Array
     },
     invites: {
-        type: Array
+        type: [friendSchema]
     }
 }, {strict: false})
 

@@ -62,9 +62,7 @@ class Doblet {
                     this.board[i][1]++;
                     return true;
                 }
-                else {
-                    return false;
-                }
+                else { return false; }           
             }
             else {
                 if (this.board[i][1] > 0) {
@@ -75,9 +73,7 @@ class Doblet {
                     this.board[i][0]--;
                     return true;
                 } 
-                else {
-                    return false;
-                }
+                else {return false;}
             }
         }
         else if (player == this.player2) {
@@ -87,9 +83,7 @@ class Doblet {
                     this.board[i][2]++;
                     return true;
                 }
-                else {
-                    return false;
-                }
+                else {return false;}
             }
             else {
                 if (this.board[i][2] > 0) {
@@ -100,9 +94,7 @@ class Doblet {
                     this.board[i][3]--;
                     return true;
                 } 
-                else {
-                    return false;
-                }
+                else {return false;}
             }
         }
     }
@@ -110,16 +102,12 @@ class Doblet {
     allPlayedDown(player) {
         if (player == this.player1) {
             for (let i=0; i<6;i++) {
-                if (this.board[i][0] != 1) {
-                    return false;
-                }
+                if (this.board[i][0] != 1) {return false;}
             }
         }
         else if (player == this.player2) {
             for (let i=0; i<6;i++) {
-                if (this.board[i][3] != 1) {
-                    return false;
-                }
+                if (this.board[i][3] != 1) {return false;}
             }
         }
         return true;

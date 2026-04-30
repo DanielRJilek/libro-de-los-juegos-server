@@ -1,3 +1,5 @@
+// Friends are stored as the _id, username, and icon
+
 const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
@@ -20,7 +22,7 @@ const getPublicUserData = asyncHandler(async (req,res) => {
         return res.status(400).json({message: "No user found"});
     }
     const friendCount = user.friends.length;
-    res.json({id: user.id, username: user.username, friendCount: friendCount, profilePic: user.profilePic});
+    res.json({id: user.id, username: user.username, friendCount: friendCount, icon: user.icon});
 })
 
 const getPrivateUserData = asyncHandler(async (req,res) => {
@@ -29,11 +31,9 @@ const getPrivateUserData = asyncHandler(async (req,res) => {
     if (!user) {
         return res.status(400).json({message: "No user found"});
     }
-    const friendRequests = await User.find({_id: {$in: user.friendRequests}}).select('username').exec();
-    const friends = await User.find({_id: {$in: user.friends}}).select('username').exec();
     const activeGames = await GameInstance.find({_id: {$in: user.activeGames}}).exec();
-    res.json({id: user.id, username: user.username, friends: friends, 
-        friendRequests: friendRequests, invites: user.invites, activeGames: activeGames, profilePic: user.profilePic});
+    res.json({id: user.id, username: user.username, friends: user.friends,
+        friendRequests: user.friendRequests, invites: user.invites, activeGames: activeGames, icon: user.icon});
 })
 
 const createUser = asyncHandler(async (req,res) => {
@@ -50,7 +50,7 @@ const createUser = asyncHandler(async (req,res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password1, 10);
-    const userObject = {"username": username, "password": hashedPassword, "activeGames": [], "profilePic": "/images/fil.png"};
+    const userObject = {"username": username, "password": hashedPassword, "activeGames": [], "icon": "/images/fil.png"};
     const user = await User.create(userObject);
     if (user) {
         res.status(201).json({message: `New user ${username} created`});
@@ -108,8 +108,7 @@ const getAllFriends = asyncHandler(async (req,res) => {
     if (!user) {
         return res.status(400).json({message: "User not found"});
     }
-    const friends = await User.find({_id: {$in: user.friends}}).select('username').exec();
-    res.json(friends);
+    res.json(user.friends);
 });
 
 const addFriend = asyncHandler(async (req,res) => {
@@ -126,12 +125,12 @@ const addFriend = asyncHandler(async (req,res) => {
         return res.status(400).json({message: "Can't befriend yourself"});
     }
     const inFriendList = await User.find({    _id: id,
-                                        friends: {"$in": friendID}})
+                                        "friends._id": friendID})
     if (inFriendList.length != 0) {
         return res.status(409).json({message: "Already friends"});
     }
     const requested = await User.find({    _id: id,
-                                        friendRequests: {"$in": friendID}})
+                                        "friendRequests._id": friendID})
     if (requested.length == 0) {
         return res.status(409).json({message: "User has not received a friend request from the other user"});
     }
@@ -139,11 +138,15 @@ const addFriend = asyncHandler(async (req,res) => {
     if (!friend) {
         return res.status(409).json({message: "Can't find user to befriend"});
     }
-    user.friends.addToSet(friendID);
-    user.friendRequests.pull(friendID);
-    user.save();
-    friend.friends.addToSet(id);
-    friend.save();
+    await User.updateOne(
+        { _id: id },
+        { 
+            $pull: { friendRequests: { _id: friendID } },
+            $addToSet: { friends: { _id: friendID, username: friend.username, icon: friend.icon } }
+        }
+    );
+    friend.friends.addToSet({ _id: id, username: user.username, icon: user.icon });
+    await friend.save();
     res.status(201).json({message: `Friend added`});
 
 });
@@ -159,14 +162,14 @@ const deleteFriend = asyncHandler(async (req,res) => {
         return res.status(400).json({message: "All fields required"});
     }
     const friend = await User.find({    _id: id,
-                                        friends: {"$in": friendID}})
+                                        "friends._id": friendID})
     if (friend.length == 0) {
         return res.status(409).json({message: "Not friends"});
     }
-    user.friends.pull(friendID);
-    user.save();
-    friend.friends.pull(id);
-    friend.save();
+    user.friends.pull({ _id: friendID });
+    await user.save();
+    friend.friends.pull({ _id: id });
+    await friend.save();
     res.status(201).json({message: `Friend removed`});
 });
 
@@ -176,8 +179,7 @@ const getAllFriendRequests = asyncHandler(async (req,res) => {
     if (!user) {
         return res.status(400).json({message: "User not found"});
     }
-    const friendRequests = await User.find({_id: {$in: user.friendRequests}}).select('username').exec();
-    res.json(friendRequests);
+    res.json(user.friendRequests);
 });
 
 const sendFriendRequest = asyncHandler(async (req,res) => {
@@ -198,12 +200,12 @@ const sendFriendRequest = asyncHandler(async (req,res) => {
         return res.status(400).json({message: "Can't befriend yourself"});
     }
     const inFriendList = await User.find({    _id: id,
-                                        friends: {"$in": friendID}})
+                                        "friends._id": friendID})
     if (inFriendList.length != 0) {
         return res.status(409).json({message: "Already friends"});
     }
     const requests = await User.find({    _id: friendID,
-                                        friendRequests: {"$in": id}})
+                                        "friendRequests._id": id})
     if (requests.length != 0) {
         return res.status(409).json({message: "Friend request already sent"});
     }
@@ -211,7 +213,7 @@ const sendFriendRequest = asyncHandler(async (req,res) => {
     if (!friend) {
         return res.status(409).json({message: "Can't find user to befriend"});
     }
-    friend.friendRequests.addToSet(id);
+    friend.friendRequests.addToSet({ _id: id, username: user.username, icon: user.icon });
     friend.save();
     res.status(201).json({message: `Friend request sent`});
 });
@@ -226,7 +228,7 @@ const deleteFriendRequest = asyncHandler(async (req,res) => {
     if (!friendID) {
         return res.status(400).json({message: "All fields required"});
     }
-    user.friendRequests.pull(friendID);
+    user.friendRequests.pull({ _id: friendID });
     user.save();
     res.status(201).json({message: `Friend request deleted`});
 });
@@ -252,7 +254,7 @@ const sendInvite = asyncHandler(async (req,res) => {
     }
     const {username, instance} = req.body;
     const game_instance = await GameInstance.findById(instance).exec();
-    const invite = {table: {_id: instance, title: game_instance.title},  sender: {_id: id, username: user.username}};
+    const invite = {table: {_id: instance, title: game_instance.title},  sender: {_id: id, username: user.username, icon: user.icon}};
     const friend = await User.findOne({username}).exec();
     if (!friend) {
         return res.status(400).json({message: "User not found"});
@@ -270,7 +272,7 @@ const sendInvite = asyncHandler(async (req,res) => {
     if (invites.length != 0) {
         return res.status(409).json({message: "Invite already sent"});
     }
-    game_instance.invites.addToSet({_id: friend._id.toString(), username: friend.username});
+    game_instance.invites.addToSet({_id: friend._id.toString(), username: friend.username, icon: friend.icon});
     game_instance.save();
     friend.invites.addToSet(invite);
     friend.save();
