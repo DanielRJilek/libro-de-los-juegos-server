@@ -6,6 +6,17 @@ const friendSchema = new mongoose.Schema({
     icon: String
 }, { _id: false });
 
+const inviteSchema = new mongoose.Schema({
+    table: {
+        _id: { type: mongoose.Schema.Types.ObjectId, ref: 'GameInstance', required: true },
+        title: String
+    },
+    sender: {
+        _id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        username: String
+    }
+}, { _id: false });
+
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
@@ -32,7 +43,7 @@ const userSchema = new mongoose.Schema({
         type: Array
     },
     invites: {
-        type: [friendSchema]
+        type: [inviteSchema]
     }
 }, {strict: false})
 

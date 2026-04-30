@@ -228,8 +228,10 @@ const deleteFriendRequest = asyncHandler(async (req,res) => {
     if (!friendID) {
         return res.status(400).json({message: "All fields required"});
     }
-    user.friendRequests.pull({ _id: friendID });
-    user.save();
+    await User.updateOne(
+        { _id: id },
+        { $pull: { friendRequests: { _id: friendID } } } 
+    );
     res.status(201).json({message: `Friend request deleted`});
 });
 

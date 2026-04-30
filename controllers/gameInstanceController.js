@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const GameInstance = require('../models/GameInstance');
 const User = require('../models/User');
 const Game = require('../models/Game');
+const mongoose = require('mongoose');
 
 const deleteGameInstance = asyncHandler(async (req,res) => {
     const id = req.params.instance;
@@ -58,8 +59,9 @@ const loadGame = asyncHandler(async (req,res) => {
         return res.status(403).json({message: "Forbidden"});
     }
     for (let player of game.players) {
-        const user = await User.findById(player._id).select('username');
+        const user = await User.findById(player._id);
         player.username = user.username;
+        player.icon = user.icon;
     }
     return game;
 });
@@ -69,6 +71,7 @@ const addPlayer = asyncHandler(async (req,res) => {
     const userID = req.user.id;
     const tableID = req.params.instance;
     const gameInstance = await GameInstance.findById(tableID).exec();
+    const tableObjectId = new mongoose.Types.ObjectId(tableID);
     
     if (!gameInstance) {
         return res.status(400).json({message: "Game instance not found"});
@@ -88,15 +91,18 @@ const addPlayer = asyncHandler(async (req,res) => {
         return res.status(409).json({message: "User has not received a game invite from the other user"});
     }
     const owner = await User.findById(gameInstance.owner).select('username');
-    gameInstance.players.addToSet({ "_id": newPlayer._id,
-                                    "phase": 1,
-                                    "username": newPlayer.username
-    });
-    gameInstance.invites.pull({_id: newPlayer._id.toString(), username: newPlayer.username});
-    await gameInstance.save();
-    newPlayer.invites.pull({table: {_id: tableID, title: gameInstance.title}, sender: {_id: gameInstance.owner, username: owner.username}});
-    newPlayer.activeGames.addToSet(gameInstance._id);
-    await newPlayer.save();
+    await GameInstance.updateOne(
+        { _id: tableID },
+        { 
+            $pull: { invites: { _id: userID } },
+            $addToSet: { players: { _id: newPlayer._id, username: newPlayer.username, icon: newPlayer.icon, phase: 1 } }
+        }
+    );
+    await User.updateOne(
+        { _id: newPlayer._id },
+        { $pull: { invites: { "table._id": tableID } },
+          $addToSet: { activeGames: gameInstance._id } }
+    );
     io.to(tableID).emit('player-joined', {message: `Player ${newPlayer.username} joined game instance ${tableID}`});
     res.status(201).json({message: `Player ${newPlayer.username} added to game instance ${tableID}`});
 });

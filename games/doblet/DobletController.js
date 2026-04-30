@@ -22,7 +22,8 @@ const createDobletInstance = asyncHandler(async (req,res) => {
     }
     const player1 = {   "_id": id1,
                         "phase": 1,
-                        "username": user1.username
+                        "username": user1.username,
+                        "icon": user1.icon
     }
     gameInstance.players.addToSet(player1);
     gameInstance.save();
