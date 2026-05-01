@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const Game = require('../models/Game');
 const GameInstance = require('../models/GameInstance');
+const Icon = require('../models/Icon');
 
 const getMyData = asyncHandler(async (req,res) => {
     const {id} = req.user;
@@ -65,25 +66,32 @@ const updateUser = asyncHandler(async (req,res) => {
     if (!id) {
         return res.status(400).json({message: "User ID required"});
     }
-    const {username, password, active} = req.body;
-    if (!username || !active) {
-        return res.status(400).json({message: "All fields required"});
-    }
-
+    const {username, password, active, icon} = req.body;
     const user = await User.findById(id).exec();
     if (!user) {
         return res.status(400).json({message: "user not found"});
     }
-    const duplicate = await User.findOne({username}).lean().exec();
-    if (duplicate && duplicate.id.toString() != id) {
-        return res.status(409).json({message: "Duplicate username"});
-    }
-
-    user.username = username;
-    user.active = active;
+    
     if (password) {
         user.password = await bcrypt.hash(password, 10); 
     }
+    if (icon) {
+        user.icon = icon;
+    }
+    if (username) {
+        user.username = username;
+        const duplicate = await User.findOne({username}).lean().exec();
+        if (duplicate && duplicate.id.toString() != id) {
+            return res.status(409).json({message: "Duplicate username"});
+        }
+        for (let friend of user.friends) {
+            await User.updateOne(
+                { _id: friend._id, "friends._id": id },
+                { $set: { "friends.$.username": username } }
+            );
+        }
+    }
+
     const updatedUser = await user.save();
     res.json({message: `${updatedUser.username} updated`})
 });
@@ -300,6 +308,11 @@ const addActiveGame = asyncHandler(async (req,res) => {
 
 });
 
+const getIcons = asyncHandler(async (req,res) => {
+    const icons = await Icon.find().exec();
+    res.json(icons);
+});
+
 
 module.exports = {getMyData, getPublicUserData, getPrivateUserData, createUser, updateUser, deleteUser, getAllFriends, addFriend, deleteFriend, 
-    getAllFriendRequests, sendFriendRequest, deleteFriendRequest, getAllInvites, sendInvite, deleteInvite}
+    getAllFriendRequests, sendFriendRequest, deleteFriendRequest, getAllInvites, sendInvite, deleteInvite, getIcons};

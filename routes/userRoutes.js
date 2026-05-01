@@ -9,6 +9,9 @@ router.route('/')
     .get(verifyJWT, controller.getMyData)
     .post(controller.createUser)
 
+router.route('/icons')
+    .get(controller.getIcons)
+
 router.use(verifyJWT);
 
 router.route('/:userid')
