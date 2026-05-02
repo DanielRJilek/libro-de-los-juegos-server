@@ -295,11 +295,11 @@ const deleteInvite = asyncHandler(async (req,res) => {
     if (!user) {
         return res.status(400).json({message: "User not found"});
     }
-    const {invite} = req.body;
-    if (!invite) {
+    const {inviteID} = req.body;
+    if (!inviteID) {
         return res.status(400).json({message: "All fields required"});
     }
-    user.invites.pull(invite);
+    user.invites.pull({ _id: inviteID });
     user.save();
     res.status(201).json({message: `Game invite deleted`});
 });
