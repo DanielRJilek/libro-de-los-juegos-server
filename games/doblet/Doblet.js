@@ -3,41 +3,36 @@ This represents the model of the game
 */
 
 class Doblet {
-    constructor(id, player1, player2, currentPlayer, board) {
+    constructor(id, players, board, currentPlayer) {
         this.id = id;
-        this.player1 = player1;
-        this.player2 = player2;
+        this.player1 = players[0];
+        this.player2 = players[1];
         this.board = board;
         this.winner = null;
-        this.otherPlayer;
         this.dice;
-        if (currentPlayer._id == this.player1._id) {
+        this.currentPlayer = currentPlayer;
+        for (let i=0; i < players.length; i++) {
+            if (this.currentPlayer && players[i].username != this.currentPlayer.username) {
+                this.otherPlayer = players[i];
+            }
+        }
+    }
+
+    setup() {
+        const randomNumber = Math.floor(Math.random() * 2) + 1;
+        if (randomNumber == 1) {
             this.currentPlayer = this.player1;
-            // this.otherPlayer = this.player1 ? this.currentPlayer == this.player2 : this.player2;
             this.otherPlayer = this.player2;
         }
         else {
             this.currentPlayer = this.player2;
-            // this.otherPlayer = this.player1 ? this.currentPlayer == this.player2 : this.player2;
             this.otherPlayer = this.player1;
         }
     }
 
-    setup() {}
-
-    // startingPlayer(player1, player2) {
-    //     player1Roll = Math.random() * (6-1) + 1;
-    //     player2Roll = Math.random() * (6-1) + 1;
-    //     if (player1Roll == player2Roll) {
-    //         return this.startingPlayer(player1,player2)
-    //     }
-    //     return player1 ? player1Roll > player2Roll : player2;
-    // }
-
     setCurrentPlayer(player) {
         this.currentPlayer = player;
-        this.otherPlayer = this.player1 ? this.currentPlayer == this.player2 : this.player2;
-        
+        this.otherPlayer == this.player1 ? this.otherPlayer = this.player2 : this.otherPlayer = this.player1;
     }
 
     getRandomInt(min, max) {
@@ -114,12 +109,9 @@ class Doblet {
     }
 
     gameOver() {
-        for (let i=0; i<6;i++) {
-            if (this.board[i][0] != 0 || this.board[i][3] != 0) {
-                return false;
-            }
-        }
-        return true;
+        const player1Won = this.board.every(row => row[0] === 0 && row[1] === 0);
+        const player2Won = this.board.every(row => row[2] === 0 && row[3] === 0);
+        return player1Won || player2Won;
     }
 
     endGame(player) {
@@ -150,13 +142,15 @@ class Doblet {
                 }
             }
         }
+        console.log(`Winner: ${this.winner}`);
         if (this.winner) {
             return;
         }
         else {
-            console.log(`current player: ${this.currentPlayer.username}, other player: ${this.otherPlayer.username}`);
             this.setCurrentPlayer(this.otherPlayer);
             console.log(`current player: ${this.currentPlayer.username}, other player: ${this.otherPlayer.username}`);
+            // console.log(this.board);
+            // console.log(this.board[0][0], this.board[0][1], this.board[0][2], this.board[0][3]);
         }
     }
 }

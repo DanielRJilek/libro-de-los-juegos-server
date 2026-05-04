@@ -44,6 +44,14 @@ const userSchema = new mongoose.Schema({
     },
     invites: {
         type: [inviteSchema]
+    },
+    gamesWon: {
+        type: Number,
+        default: 0
+    },
+    gamesPlayed: {
+        type: Number,
+        default: 0
     }
 }, {strict: false})
 

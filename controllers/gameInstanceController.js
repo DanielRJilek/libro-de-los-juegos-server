@@ -34,6 +34,7 @@ const getAllData = asyncHandler(async (req,res) => {
     if (!game.players.some(player => player._id.toString() == req.user.id)) {
         return res.status(403).json({message: "Forbidden"});
     }
+    // is this redundant now?
     for (let player of game.players) {
         const user = await User.findById(player._id);
         player.username = user.username;
@@ -107,20 +108,13 @@ const addPlayer = asyncHandler(async (req,res) => {
     res.status(201).json({message: `Player ${newPlayer.username} added to game instance ${tableID}`});
 });
 
-const startGame = asyncHandler(async (req,res) => {
-    const io = require('../server')
-    const tableID = req.params.instance;
-    const gameInstance = await GameInstance.findById(tableID).exec();
-    if (!gameInstance) {
-        return res.status(400).json({message: "Game instance not found"});
+const endGame = asyncHandler(async (id) => {
+    const game = await GameInstance.findById(id).exec();
+    await User.updateMany({ activeGames: id }, { $pull: { activeGames: id }, $inc: { gamesPlayed: 1 } });
+    if (game.winner) {
+        await User.updateOne({ _id: game.winner }, { $inc: { gamesWon: 1 } });
     }
-    if (gameInstance.owner != req.user.id) {
-        return res.status(403).json({message: "Forbidden"});
-    }
-    gameInstance.started = true;
-    gameInstance.save();
-    io.to(tableID).emit('game-start', {message: `Game instance ${tableID} started`});
-    res.status(201).json({message: `Game instance ${tableID} started`});
+    await game.deleteOne();
 });
 
-module.exports = { deleteGameInstance, getAllData, loadGame, addPlayer, startGame }
+module.exports = { deleteGameInstance, getAllData, loadGame, addPlayer}

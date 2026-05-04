@@ -27,6 +27,6 @@ router.route('/:instance/players')
     .post(gameInstanceController.addPlayer)
 
 router.route('/:instance/start')
-    .post(gameInstanceController.startGame)
+    .post(dobletController.startGame)
 
 module.exports = router;
