@@ -2,11 +2,12 @@
 This represents the model of the game
 */
 
+const Piece = require('./Piece');
+
 class Doblet {
     constructor(id, players, board, currentPlayer) {
         this.id = id;
-        this.player1 = players[0];
-        this.player2 = players[1];
+        this.players = players;
         this.board = board;
         this.winner = null;
         this.dice;
@@ -21,12 +22,18 @@ class Doblet {
     setup() {
         const randomNumber = Math.floor(Math.random() * 2) + 1;
         if (randomNumber == 1) {
-            this.currentPlayer = this.player1;
-            this.otherPlayer = this.player2;
+            this.currentPlayer = this.players[0];
+            this.otherPlayer = this.players[1];
         }
         else {
-            this.currentPlayer = this.player2;
-            this.otherPlayer = this.player1;
+            this.currentPlayer = this.players[1];
+            this.otherPlayer = this.players[0];
+        }
+        for (let i=0; i<6; i++) {
+            this.board[i][0].push(new Piece(this.players[0], 0));
+            this.board[i][0].push(new Piece(this.players[0], 0));
+            this.board[i][3].push(new Piece(this.players[1], 3));
+            this.board[i][3].push(new Piece(this.players[1], 3));
         }
     }
 
@@ -52,20 +59,20 @@ class Doblet {
     canMove(player, i) {
         if (player == this.player1) {
             if (player.phase == 1) {
-                if (this.board[i][1] == 0) {
-                    this.board[i][0]--;
-                    this.board[i][1]++;
+                if (this.board[i][1][0] == 0) {
+                    this.board[i][0][0]--;
+                    this.board[i][1][0]++;
                     return true;
                 }
                 else { return false; }           
             }
             else {
-                if (this.board[i][1] > 0) {
-                    this.board[i][1]--;
+                if (this.board[i][1][0] > 0) {
+                    this.board[i][1][0]--;
                     return true;
                 }
-                else if (this.board[i][0] > 0) {
-                    this.board[i][0]--;
+                else if (this.board[i][0][0] > 0) {
+                    this.board[i][0][0]--;
                     return true;
                 } 
                 else {return false;}
@@ -73,20 +80,20 @@ class Doblet {
         }
         else if (player == this.player2) {
             if (player.phase == 1) {
-                if (this.board[i][2] == 0) {
-                    this.board[i][3]--;
-                    this.board[i][2]++;
+                if (this.board[i][2][0] == 0) {
+                    this.board[i][3][0]--;
+                    this.board[i][2][0]++;
                     return true;
                 }
                 else {return false;}
             }
             else {
-                if (this.board[i][2] > 0) {
-                    this.board[i][2]--;
+                if (this.board[i][2][0] > 0) {
+                    this.board[i][2][0]--;
                     return true;
                 }
-                else if (this.board[i][3] > 0) {
-                    this.board[i][3]--;
+                else if (this.board[i][3][0] > 0) {
+                    this.board[i][3][0]--;
                     return true;
                 } 
                 else {return false;}
@@ -97,20 +104,20 @@ class Doblet {
     allPlayedDown(player) {
         if (player == this.player1) {
             for (let i=0; i<6;i++) {
-                if (this.board[i][0] != 1) {return false;}
+                if (this.board[i][0][0] != 1) {return false;}
             }
         }
         else if (player == this.player2) {
             for (let i=0; i<6;i++) {
-                if (this.board[i][3] != 1) {return false;}
+                if (this.board[i][3][0] != 1) {return false;}
             }
         }
         return true;
     }
 
     gameOver() {
-        const player1Won = this.board.every(row => row[0] === 0 && row[1] === 0);
-        const player2Won = this.board.every(row => row[2] === 0 && row[3] === 0);
+        const player1Won = this.board.every(row => row[0][0] === 0 && row[1][0] === 0);
+        const player2Won = this.board.every(row => row[2][0] === 0 && row[3][0] === 0);
         return player1Won || player2Won;
     }
 

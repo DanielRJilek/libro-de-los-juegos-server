@@ -1,5 +1,3 @@
-const asyncHandler = require('express-async-handler');
-const User = require('../models/User');
 const GameInstance = require('../models/GameInstance');
 
 const isPlayer = async (req,res,next) => {

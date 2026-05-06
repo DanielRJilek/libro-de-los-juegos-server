@@ -1,5 +1,4 @@
 // a lot of this should move to gameController to be more general. everything except /play 
-
 const express = require('express');
 const router = express.Router();
 const dobletController = require('./DobletController');
@@ -13,7 +12,6 @@ router.use(verifyJWT)
 router.route('/')
     .post(dobletController.createDobletInstance)
     
-
 router.use(isPlayer);
 
 router.route('/:instance')

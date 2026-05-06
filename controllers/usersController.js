@@ -77,6 +77,15 @@ const updateUser = asyncHandler(async (req,res) => {
     }
     if (icon) {
         user.icon = icon;
+        for (let friend of user.friends) {
+            await User.updateOne(
+                { _id: friend._id, "friends._id": id },
+                { $set: { "friends.$.icon": icon } }
+            );
+        }
+        await User.updateMany({ "friendRequests._id": id }, { $set: { "friendRequests.$.icon": icon } });
+        await User.updateMany({ "invites.sender._id": id }, { $set: { "invites.$.sender.icon": icon } });
+        await GameInstance.updateMany({ "players._id": id }, { $set: { "players.$.icon": icon } });
     }
     if (username) {
         user.username = username;

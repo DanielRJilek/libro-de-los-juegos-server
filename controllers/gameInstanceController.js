@@ -1,7 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const GameInstance = require('../models/GameInstance');
 const User = require('../models/User');
-const Game = require('../models/Game');
 const mongoose = require('mongoose');
 
 const deleteGameInstance = asyncHandler(async (req,res) => {

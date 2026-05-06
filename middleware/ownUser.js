@@ -1,5 +1,3 @@
-const asyncHandler = require('express-async-handler');
-
 const ownUser = (req,res,next) => {
     const claimedID = req.params.userid;
     if (claimedID != req.user.id) {

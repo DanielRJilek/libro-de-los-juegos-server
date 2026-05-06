@@ -2,7 +2,6 @@ const asyncHandler = require('express-async-handler');
 const GameInstance = require('../../models/GameInstance');
 const User = require('../../models/User');
 const Doblet = require('./Doblet');
-const Game = require('../../models/Game');
 const endGame = require('../../controllers/gameInstanceController').endGame;
 
 // for now automatically makes the host player1, later implement the players rolling for first
@@ -10,7 +9,7 @@ const createDobletInstance = asyncHandler(async (req,res) => {
     const id1 = req.user.id;
     const user1 = await User.findById(id1);
     const dobletObject = {  "owner": id1,
-                            "board": [[2,0,0,2], [2,0,0,2], [2,0,0,2], [2,0,0,2], [2,0,0,2], [2,0,0,2]],
+                            "board": Array(6).fill(Array(4).fill([0, null])),
                             // "currentPlayer":{"_id": id1, "username": user1.username},
                             "title": "doblet",
                             "started": false,
