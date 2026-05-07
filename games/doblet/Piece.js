@@ -4,3 +4,5 @@ class Piece {
         this.position = position;
     }
 }
+
+module.exports = {Piece}

@@ -2,7 +2,7 @@
 This represents the model of the game
 */
 
-const Piece = require('./Piece');
+const { Piece } = require('./Piece');
 
 class Doblet {
     constructor(id, players, board, currentPlayer) {
@@ -29,6 +29,7 @@ class Doblet {
             this.currentPlayer = this.players[1];
             this.otherPlayer = this.players[0];
         }
+        console.log(this.board)
         for (let i=0; i<6; i++) {
             this.board[i][0].push(new Piece(this.players[0], 0));
             this.board[i][0].push(new Piece(this.players[0], 0));
@@ -39,7 +40,7 @@ class Doblet {
 
     setCurrentPlayer(player) {
         this.currentPlayer = player;
-        this.otherPlayer == this.player1 ? this.otherPlayer = this.player2 : this.otherPlayer = this.player1;
+        this.otherPlayer == this.players[0] ? this.otherPlayer = this.players[1] : this.otherPlayer = this.players[0];
     }
 
     getRandomInt(min, max) {
@@ -57,43 +58,43 @@ class Doblet {
     }
 
     canMove(player, i) {
-        if (player == this.player1) {
+        if (player.playerNumber == 1) {
             if (player.phase == 1) {
-                if (this.board[i][1][0] == 0) {
-                    this.board[i][0][0]--;
-                    this.board[i][1][0]++;
+                if (this.board[i][1].length == 0) {
+                    this.board[i][0].pop();
+                    this.board[i][1].push(new Piece(player, 1));
                     return true;
                 }
                 else { return false; }           
             }
             else {
-                if (this.board[i][1][0] > 0) {
-                    this.board[i][1][0]--;
+                if (this.board[i][1].length > 0) {
+                    this.board[i][1].pop();
                     return true;
                 }
-                else if (this.board[i][0][0] > 0) {
-                    this.board[i][0][0]--;
+                else if (this.board[i][0].length > 0) {
+                    this.board[i][0].pop();
                     return true;
                 } 
                 else {return false;}
             }
         }
-        else if (player == this.player2) {
+        else if (player.playerNumber == 2) {
             if (player.phase == 1) {
-                if (this.board[i][2][0] == 0) {
-                    this.board[i][3][0]--;
-                    this.board[i][2][0]++;
+                if (this.board[i][2].length == 0) {
+                    this.board[i][3].pop();
+                    this.board[i][2].push(new Piece(player, 2));
                     return true;
                 }
                 else {return false;}
             }
             else {
-                if (this.board[i][2][0] > 0) {
-                    this.board[i][2][0]--;
+                if (this.board[i][2].length > 0) {
+                    this.board[i][2].pop();
                     return true;
                 }
-                else if (this.board[i][3][0] > 0) {
-                    this.board[i][3][0]--;
+                else if (this.board[i][3].length > 0) {
+                    this.board[i][3].pop();
                     return true;
                 } 
                 else {return false;}
@@ -102,22 +103,22 @@ class Doblet {
     }
 
     allPlayedDown(player) {
-        if (player == this.player1) {
+        if (player.playerNumber == 1) {
             for (let i=0; i<6;i++) {
-                if (this.board[i][0][0] != 1) {return false;}
+                if (this.board[i][0].length != 1) {return false;}
             }
         }
-        else if (player == this.player2) {
+        else if (player.playerNumber == 2) {
             for (let i=0; i<6;i++) {
-                if (this.board[i][3][0] != 1) {return false;}
+                if (this.board[i][3].length != 1) {return false;}
             }
         }
         return true;
     }
 
     gameOver() {
-        const player1Won = this.board.every(row => row[0][0] === 0 && row[1][0] === 0);
-        const player2Won = this.board.every(row => row[2][0] === 0 && row[3][0] === 0);
+        const player1Won = this.board.every(row => row[0].length === 0 && row[1].length === 0);
+        const player2Won = this.board.every(row => row[2].length === 0 && row[3].length === 0);
         return player1Won || player2Won;
     }
 
@@ -126,6 +127,7 @@ class Doblet {
     }
 
     takeTurn() {
+        console.log("New turn:")
         console.log(`current player: ${this.currentPlayer.username}, other player: ${this.otherPlayer.username}`);
         this.dice = this.rollDice(3);
         for (let i=0; i<3; i++) {
@@ -149,15 +151,11 @@ class Doblet {
                 }
             }
         }
-        console.log(`Winner: ${this.winner}`);
         if (this.winner) {
             return;
         }
         else {
             this.setCurrentPlayer(this.otherPlayer);
-            console.log(`current player: ${this.currentPlayer.username}, other player: ${this.otherPlayer.username}`);
-            // console.log(this.board);
-            // console.log(this.board[0][0], this.board[0][1], this.board[0][2], this.board[0][3]);
         }
     }
 }

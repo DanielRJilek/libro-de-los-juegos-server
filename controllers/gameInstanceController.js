@@ -30,7 +30,8 @@ const getAllData = asyncHandler(async (req,res) => {
     if (!game) {
         return res.status(400).json({message: "Game instance not found"});
     }
-    if (!game.players.some(player => player._id.toString() == req.user.id)) {
+    console.log(`game: ${game}`)
+    if (!game.players.some(player => player?._id && player._id.toString() == req.user.id)) {
         return res.status(403).json({message: "Forbidden"});
     }
     // is this redundant now?
@@ -42,7 +43,6 @@ const getAllData = asyncHandler(async (req,res) => {
     }  
     const owner = await User.findById(game.owner).exec();
     game.owner = owner;
-
     res.json(game);
 });
 
@@ -55,13 +55,14 @@ const loadGame = asyncHandler(async (req,res) => {
     if (!game) {
         return res.status(400).json({message: "Game instance not found"});
     }
-    if (!game.players.some(player => player._id.toString() == req.user.id)) {
+    if (!game.players.some(player => player?._id && player._id.toString() == req.user.id)) {
         return res.status(403).json({message: "Forbidden"});
     }
     for (let player of game.players) {
         const user = await User.findById(player._id);
         player.username = user.username;
         player.icon = user.icon;
+        player.playerNumber = game.playerCount;
     }
     return game;
 });
@@ -95,7 +96,8 @@ const addPlayer = asyncHandler(async (req,res) => {
         { _id: tableID },
         { 
             $pull: { invites: { _id: userID } },
-            $addToSet: { players: { _id: newPlayer._id, username: newPlayer.username, icon: newPlayer.icon, phase: 1 } }
+            $addToSet: { players: { _id: newPlayer._id, username: newPlayer.username, icon: newPlayer.icon, phase: 1, playerNumber: gameInstance.playerCount +1 } },
+            $inc: { playerCount: 1 }
         }
     );
     await User.updateOne(
