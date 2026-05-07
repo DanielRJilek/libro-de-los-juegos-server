@@ -52,6 +52,10 @@ const userSchema = new mongoose.Schema({
     gamesPlayed: {
         type: Number,
         default: 0
+    },
+    memberSince: {
+        type: Date,
+        default: Date.now
     }
 }, {strict: false})
 

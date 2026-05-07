@@ -23,7 +23,8 @@ const getPublicUserData = asyncHandler(async (req,res) => {
         return res.status(400).json({message: "No user found"});
     }
     const friendCount = user.friends.length;
-    res.json({id: user.id, username: user.username, friendCount: friendCount, icon: user.icon});
+    res.json({id: user.id, username: user.username, friendCount: friendCount, icon: user.icon, memberSince: user.memberSince, 
+        gamesWon: user.gamesWon, gamesPlayed: user.gamesPlayed});
 })
 
 const getPrivateUserData = asyncHandler(async (req,res) => {
@@ -34,7 +35,8 @@ const getPrivateUserData = asyncHandler(async (req,res) => {
     }
     const activeGames = await GameInstance.find({_id: {$in: user.activeGames}}).exec();
     res.json({id: user.id, username: user.username, friends: user.friends,
-        friendRequests: user.friendRequests, invites: user.invites, activeGames: activeGames, icon: user.icon});
+        friendRequests: user.friendRequests, invites: user.invites, activeGames: activeGames, icon: user.icon, 
+        memberSince: user.memberSince, gamesWon: user.gamesWon, gamesPlayed: user.gamesPlayed});
 })
 
 const createUser = asyncHandler(async (req,res) => {
@@ -51,7 +53,7 @@ const createUser = asyncHandler(async (req,res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password1, 10);
-    const userObject = {"username": username, "password": hashedPassword, "activeGames": [], "icon": "/images/fil.png"};
+    const userObject = {"username": username, "password": hashedPassword, "activeGames": [], "icon": "/images/fil.png", "memberSince": Date.now()};
     const user = await User.create(userObject);
     if (user) {
         res.status(201).json({message: `New user ${username} created`});
