@@ -10,7 +10,7 @@ const createDobletInstance = asyncHandler(async (req,res) => {
     const id1 = req.user.id;
     const user1 = await User.findById(id1);
     const dobletObject = {  "owner": id1,
-                            "board": Array(6).fill(Array(4).fill([])),
+                            "board": Array.from({ length: 6 }, () => Array.from({ length: 4 }, () => [])),
                             // "currentPlayer":{"_id": id1, "username": user1.username},
                             "title": "doblet",
                             "started": false,
@@ -80,9 +80,9 @@ const play = asyncHandler(async (req,res) => {
     if (gameModel.winner) {
         // res.status(201).json({message: `New board state: ${updatedGame.board}`, board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, winner: gameModel.winner});
         // console.log(updatedGame)
+        await endGame(id);
         io.to(room).emit('game-update', {board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, 
             dice: gameModel.dice, winner: gameModel.winner})
-        await endGame(id);
     }
     res.status(201).json({message: `New board state: ${updatedGame.board}`, gameState: updatedGame, dice: gameModel.dice});
 });

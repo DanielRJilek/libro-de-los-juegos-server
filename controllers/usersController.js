@@ -6,6 +6,7 @@ const User = require('../models/User');
 const Game = require('../models/Game');
 const GameInstance = require('../models/GameInstance');
 const Icon = require('../models/Icon');
+const mongoose = require('mongoose');
 
 const getMyData = asyncHandler(async (req,res) => {
     const {id} = req.user;
@@ -310,8 +311,19 @@ const deleteInvite = asyncHandler(async (req,res) => {
     if (!inviteID) {
         return res.status(400).json({message: "All fields required"});
     }
-    user.invites.pull({ _id: inviteID });
-    user.save();
+    const gameID = typeof inviteID === 'string' ? inviteID : inviteID?.table?._id;
+    if (!gameID || !mongoose.Types.ObjectId.isValid(gameID)) {
+        return res.status(400).json({message: "Valid game invite ID required"});
+    }
+    const game = await GameInstance.findById(gameID).exec();
+    if (game) {
+        game.invites.pull({ _id: id });
+        await game.save();
+    }
+    await User.updateOne(
+        { _id: id },
+        { $pull: { invites: { "table._id": gameID } } }
+    );
     res.status(201).json({message: `Game invite deleted`});
 });
 

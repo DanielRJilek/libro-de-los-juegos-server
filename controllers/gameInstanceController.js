@@ -109,13 +109,20 @@ const addPlayer = asyncHandler(async (req,res) => {
     res.status(201).json({message: `Player ${newPlayer.username} added to game instance ${tableID}`});
 });
 
-const endGame = asyncHandler(async (id) => {
-    const game = await GameInstance.findById(id).exec();
-    await User.updateMany({ activeGames: id }, { $pull: { activeGames: id }, $inc: { gamesPlayed: 1 } });
+const endGame = asyncHandler(async (gameInstanceID, winnerID) => {
+    const game = await GameInstance.findByIdAndUpdate(gameInstanceID, { winner: winnerID }, { new: true });
+    await User.updateMany({ activeGames: gameInstanceID }, { $pull: { activeGames: gameInstanceID }, $inc: { gamesPlayed: 1 } });
     if (game.winner) {
-        await User.updateOne({ _id: game.winner }, { $inc: { gamesWon: 1 } });
+        for (let i=0; i<game.players.length; i++) {
+            if (game.players[i]._id == game.winner._id) {
+                await User.findByIdAndUpdate(game.players[i]._id, { $inc: { gamesWon: 1, gamesPlayed: 1 } });
+            }
+            else {
+                await User.findByIdAndUpdate(game.players[i]._id, { $inc: { gamesPlayed: 1 } });
+            }
+        }
     }
     await game.deleteOne();
 });
 
-module.exports = { deleteGameInstance, getAllData, loadGame, addPlayer}
+module.exports = { deleteGameInstance, getAllData, loadGame, addPlayer, endGame}
