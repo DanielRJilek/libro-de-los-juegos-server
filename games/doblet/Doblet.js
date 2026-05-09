@@ -33,12 +33,12 @@ class Doblet {
                 this.player2 = players[i];
             }
             else {
-                console.log("Invalid player number");
+                // console.log("Invalid player number");
             }
         }
         if (this.player1 && this.player2 && currentPlayer) {
             this.otherPlayer = samePlayer(currentPlayer, this.player1) ? this.player2 : this.player1;
-            console.log(`Other player: ${this.otherPlayer.username}`);
+            // console.log(`Other player: ${this.otherPlayer.username}`);
         }
     }
 
@@ -52,7 +52,7 @@ class Doblet {
             this.currentPlayer = this.player2;
             this.otherPlayer = this.player1;
         }
-        console.log(this.board)
+        // console.log(this.board)
         for (let i=0; i<6; i++) {
             this.board[i][0].push(new Piece(this.player1, 0));
             this.board[i][0].push(new Piece(this.player1, 0));
@@ -98,8 +98,8 @@ class Doblet {
 
     canMove(player, i) {
         if (!player) return false;
-        console.log(`Checking if player ${player.playerNumber} can move on column ${i}`);
-        console.log(`Player phase: ${player.phase}`);
+        // console.log(`Checking if player ${player.playerNumber} can move on column ${i}`);
+        // console.log(`Player phase: ${player.phase}`);
         if (player.playerNumber == 1) {
             if (player.phase == 1) {
                 if (this.board[i][1].length == 0) {
@@ -110,7 +110,7 @@ class Doblet {
                 else { return false; }           
             }
             else {
-                console.log("Player is in phase 2");
+                // console.log("Player is in phase 2");
                 if (this.board[i][1].length > 0) {
                     this.board[i][1].pop();
                     return true;
@@ -147,21 +147,21 @@ class Doblet {
 
     allPlayedDown(player) {
         if (player.playerNumber == 1) {
-            console.log("Checking if all pieces are played down for player 1");
+            // console.log("Checking if all pieces are played down for player 1");
             for (let i=0; i<6;i++) {
-                console.log(`Checking if column ${i} has 1 piece for player 1`);
+                // console.log(`Checking if column ${i} has 1 piece for player 1`);
                 if (this.board[i][0].length != 1 && this.board[i][1].length != 1) {
-                    console.log(`Column ${i} does not have 1 piece for player 1`);
+                    // console.log(`Column ${i} does not have 1 piece for player 1`);
                     return false;
                 }
             }
         }
         else if (player.playerNumber == 2) {
-            console.log("Checking if all pieces are played down for player 2");
+            // console.log("Checking if all pieces are played down for player 2");
             for (let i=0; i<6;i++) {
-                console.log(`Checking if column ${i} has 1 piece for player 2`);
+                // console.log(`Checking if column ${i} has 1 piece for player 2`);
                 if (this.board[i][3].length != 1 && this.board[i][2].length != 1) {
-                    console.log(`Column ${i} does not have 1 piece for player 2`);
+                    // console.log(`Column ${i} does not have 1 piece for player 2`);
                     return false;
                 }
             }
@@ -180,12 +180,12 @@ class Doblet {
     }
 
     takeTurn() {
-        console.log("New turn:")
-        console.log(`current player: ${this.currentPlayer.username}, other player: ${this.otherPlayer.username}`);
-        console.log(`Current player phase: ${this.currentPlayer.phase}, Other player phase: ${this.otherPlayer.phase}`);
+        // console.log("New turn:")
+        // console.log(`current player: ${this.currentPlayer.username}, other player: ${this.otherPlayer.username}`);
+        // console.log(`Current player phase: ${this.currentPlayer.phase}, Other player phase: ${this.otherPlayer.phase}`);
         this.dice = this.rollDice(3);
         for (let i=0; i<3; i++) {
-            console.log(`Dice: ${this.dice[i]}`);
+            // console.log(`Dice: ${this.dice[i]}`);
             if (this.canMove(this.currentPlayer, this.dice[i]-1) == true) {
                 console.log(`Player ${this.currentPlayer.username} can move on column ${this.dice[i]-1}`);
                 if (this.allPlayedDown(this.currentPlayer)) {
@@ -200,26 +200,26 @@ class Doblet {
             else {
                 // other player gets to use the move if possible
                 if (this.canMove(this.otherPlayer, this.dice[i]-1) == true) {
-                    console.log(`Player ${this.otherPlayer.username} can move on column ${this.dice[i]-1}`);
+                    // console.log(`Player ${this.otherPlayer.username} can move on column ${this.dice[i]-1}`);
                     if (this.allPlayedDown(this.otherPlayer)) {
-                        console.log(`Player ${this.otherPlayer.username} has all pieces played down, moving to phase 2`);
+                        // console.log(`Player ${this.otherPlayer.username} has all pieces played down, moving to phase 2`);
                         this.setPlayerPhase(this.otherPlayer, 2);
                     }
                     if (this.gameOver()) {
-                        console.log(`Game over, winner: ${this.otherPlayer.username}`);
+                        // console.log(`Game over, winner: ${this.otherPlayer.username}`);
                         this.endGame(this.otherPlayer);
                     }
                 }
             }
         }
         if (this.winner) {
-            console.log(`Game over, winner: ${this.winner.username}`);
+            // console.log(`Game over, winner: ${this.winner.username}`);
             return;
         }
         else {
             this.setCurrentPlayer(this.otherPlayer);
         }
-        console.log(`New current player: ${this.currentPlayer.username}`);
+        // console.log(`New current player: ${this.currentPlayer.username}`);
     }
 }
 

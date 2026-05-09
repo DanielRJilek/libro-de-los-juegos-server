@@ -27,4 +27,7 @@ router.route('/:instance/players')
 router.route('/:instance/start')
     .post(dobletController.startGame)
 
+router.route('/:instance/quit')
+    .post(gameInstanceController.quitGame)
+
 module.exports = router;

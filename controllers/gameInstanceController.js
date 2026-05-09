@@ -30,7 +30,7 @@ const getAllData = asyncHandler(async (req,res) => {
     if (!game) {
         return res.status(400).json({message: "Game instance not found"});
     }
-    console.log(`game: ${game}`)
+    // console.log(`game: ${game}`)
     if (!game.players.some(player => player?._id && player._id.toString() == req.user.id)) {
         return res.status(403).json({message: "Forbidden"});
     }
@@ -109,12 +109,39 @@ const addPlayer = asyncHandler(async (req,res) => {
     res.status(201).json({message: `Player ${newPlayer.username} added to game instance ${tableID}`});
 });
 
+const quitGame = asyncHandler(async (req,res) => {
+    const id = req.params.instance;
+    const userID = req.user.id;
+    const user = await User.findById(userID).exec();
+    // console.log(`user: ${user}`);
+    if (!user) {
+        return res.status(400).json({message: "User not found"});
+    }
+    if (!id) {
+        return res.status(400).json({message: "Game ID required"});
+    }
+    const game = await GameInstance.findById(id).exec();
+    if (!game) {
+        return res.status(400).json({message: "Game instance not found"});
+    }
+    if (game.winner) {
+        return res.status(400).json({message: "Game already ended"});
+    }
+    for (let player of game.players) {
+        if (player._id != userID) {
+            await endGame(id, player._id);
+        }
+    }
+    res.status(201).json({message: "Game ended"});
+});
+
 const endGame = asyncHandler(async (gameInstanceID, winnerID) => {
+    const io = require('../server')
     const game = await GameInstance.findByIdAndUpdate(gameInstanceID, { winner: winnerID }, { new: true });
     await User.updateMany({ activeGames: gameInstanceID }, { $pull: { activeGames: gameInstanceID }, $inc: { gamesPlayed: 1 } });
-    if (game.winner) {
+    if (winnerID) {
         for (let i=0; i<game.players.length; i++) {
-            if (game.players[i]._id == game.winner._id) {
+            if (game.players[i]._id == winnerID) {
                 await User.findByIdAndUpdate(game.players[i]._id, { $inc: { gamesWon: 1, gamesPlayed: 1 } });
             }
             else {
@@ -122,7 +149,15 @@ const endGame = asyncHandler(async (gameInstanceID, winnerID) => {
             }
         }
     }
+    else {
+        for (let i=0; i<game.players.length; i++) {
+            await User.findByIdAndUpdate(game.players[i]._id, { $inc: { gamesPlayed: 1 } });
+        }
+    }
+    const winner = await User.findById(winnerID).select('username icon playerNumber');
     await game.deleteOne();
+    
+    io.to(gameInstanceID).emit('game-ended', { message: 'Game ended', winner: winner});
 });
 
-module.exports = { deleteGameInstance, getAllData, loadGame, addPlayer, endGame}
+module.exports = { deleteGameInstance, getAllData, loadGame, addPlayer, endGame, quitGame}

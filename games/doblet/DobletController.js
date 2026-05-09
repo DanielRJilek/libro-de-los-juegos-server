@@ -80,9 +80,10 @@ const play = asyncHandler(async (req,res) => {
     if (gameModel.winner) {
         // res.status(201).json({message: `New board state: ${updatedGame.board}`, board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, winner: gameModel.winner});
         // console.log(updatedGame)
-        await endGame(id);
-        io.to(room).emit('game-update', {board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, 
-            dice: gameModel.dice, winner: gameModel.winner})
+        await endGame(id, gameModel.winner._id);
+        // io.to(room).emit('game-update', {board: updatedGame.board, currentPlayer: updatedGame.currentPlayer, 
+        //     dice: gameModel.dice, winner: gameModel.winner})
+        // io.to(room).emit('game-ended', { message: 'Game ended', reason: 'win', winner: gameModel.winner});
     }
     res.status(201).json({message: `New board state: ${updatedGame.board}`, gameState: updatedGame, dice: gameModel.dice});
 });
