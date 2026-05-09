@@ -80,6 +80,22 @@ class Doblet {
         return dice;
     }
 
+    setPlayerPhase(player, phase) {
+        if (!player) return;
+        player.phase = phase;
+        for (const p of this.players) {
+            if (samePlayer(p, player)) {
+                p.phase = phase;
+            }
+        }
+        if (this.player1 && samePlayer(this.player1, player)) {
+            this.player1.phase = phase;
+        }
+        if (this.player2 && samePlayer(this.player2, player)) {
+            this.player2.phase = phase;
+        }
+    }
+
     canMove(player, i) {
         if (!player) return false;
         console.log(`Checking if player ${player.playerNumber} can move on column ${i}`);
@@ -174,9 +190,9 @@ class Doblet {
                 console.log(`Player ${this.currentPlayer.username} can move on column ${this.dice[i]-1}`);
                 if (this.allPlayedDown(this.currentPlayer)) {
                     console.log(`Player ${this.currentPlayer.username} has all pieces played down, moving to phase 2`);
-                    this.currentPlayer.phase = 2;
+                    this.setPlayerPhase(this.currentPlayer, 2);
                 }
-                else if (this.gameOver()) {
+                if (this.gameOver()) {
                     console.log(`Game over, winner: ${this.currentPlayer.username}`);
                     this.endGame(this.currentPlayer);
                 }
@@ -187,9 +203,9 @@ class Doblet {
                     console.log(`Player ${this.otherPlayer.username} can move on column ${this.dice[i]-1}`);
                     if (this.allPlayedDown(this.otherPlayer)) {
                         console.log(`Player ${this.otherPlayer.username} has all pieces played down, moving to phase 2`);
-                        this.otherPlayer.phase = 2;
+                        this.setPlayerPhase(this.otherPlayer, 2);
                     }
-                    else if (this.gameOver()) {
+                    if (this.gameOver()) {
                         console.log(`Game over, winner: ${this.otherPlayer.username}`);
                         this.endGame(this.otherPlayer);
                     }
