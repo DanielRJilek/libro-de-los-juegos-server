@@ -1,4 +1,3 @@
-// a lot of this should move to gameController to be more general. everything except /play 
 const express = require('express');
 const router = express.Router();
 const dobletController = require('./DobletController');

@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const GameInstance = require('../models/GameInstance');
 const User = require('../models/User');
 const mongoose = require('mongoose');
+const { getIo } = require('../socket');
 
 const deleteGameInstance = asyncHandler(async (req,res) => {
     const id = req.params.instance;
@@ -30,7 +31,6 @@ const getAllData = asyncHandler(async (req,res) => {
     if (!game) {
         return res.status(400).json({message: "Game instance not found"});
     }
-    // console.log(`game: ${game}`)
     if (!game.players.some(player => player?._id && player._id.toString() == req.user.id)) {
         return res.status(403).json({message: "Forbidden"});
     }
@@ -68,7 +68,6 @@ const loadGame = asyncHandler(async (req,res) => {
 });
 
 const addPlayer = asyncHandler(async (req,res) => {
-    const io = require('../server')
     const userID = req.user.id;
     const tableID = req.params.instance;
     const gameInstance = await GameInstance.findById(tableID).exec();
@@ -105,7 +104,7 @@ const addPlayer = asyncHandler(async (req,res) => {
         { $pull: { invites: { "table._id": tableID } },
           $addToSet: { activeGames: gameInstance._id } }
     );
-    io.to(tableID).emit('player-joined', {message: `Player ${newPlayer.username} joined game instance ${tableID}`});
+    getIo().to(tableID).emit('player-joined', {message: `Player ${newPlayer.username} joined game instance ${tableID}`});
     res.status(201).json({message: `Player ${newPlayer.username} added to game instance ${tableID}`});
 });
 
@@ -113,7 +112,6 @@ const quitGame = asyncHandler(async (req,res) => {
     const id = req.params.instance;
     const userID = req.user.id;
     const user = await User.findById(userID).exec();
-    // console.log(`user: ${user}`);
     if (!user) {
         return res.status(400).json({message: "User not found"});
     }
@@ -136,7 +134,6 @@ const quitGame = asyncHandler(async (req,res) => {
 });
 
 const endGame = asyncHandler(async (gameInstanceID, winnerID) => {
-    const io = require('../server')
     const game = await GameInstance.findByIdAndUpdate(gameInstanceID, { winner: winnerID }, { new: true });
     await User.updateMany({ activeGames: gameInstanceID }, { $pull: { activeGames: gameInstanceID }, $inc: { gamesPlayed: 1 } });
     if (winnerID) {
@@ -157,7 +154,7 @@ const endGame = asyncHandler(async (gameInstanceID, winnerID) => {
     const winner = await User.findById(winnerID).select('username icon playerNumber');
     await game.deleteOne();
     
-    io.to(gameInstanceID).emit('game-ended', { message: 'Game ended', winner: winner});
+    getIo().to(gameInstanceID).emit('game-ended', { message: 'Game ended', winner: winner});
 });
 
 module.exports = { deleteGameInstance, getAllData, loadGame, addPlayer, endGame, quitGame}

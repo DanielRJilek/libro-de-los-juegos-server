@@ -37,19 +37,11 @@ app.all('/*splat', (req,res) => {
     }
 });
 
-const {createServer} = require('http');
-const allowedOrigins = require('./config/allowedOrigins');
+const { createServer } = require('http');
+const { initSocket } = require('./socket');
 const server = createServer(app);
-const io = require('socket.io')(server, {cors: {origin: allowedOrigins}});
-console.log("Websocket server running");
-io.on('connection', socket => {
-    console.log("client connected");
-    socket.on('join-table', (tableID, userID) => {
-        socket.join(tableID);
-    })
-    module.exports = io;
-    
-})
+initSocket(server);
+console.log('Websocket server running');
 
 mongoose.connection.once('open', () => {
     console.log("Connected to MongoDB");
