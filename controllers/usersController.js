@@ -7,6 +7,9 @@ const Game = require('../models/Game');
 const GameInstance = require('../models/GameInstance');
 const Icon = require('../models/Icon');
 const mongoose = require('mongoose');
+const { getIo } = require('../socket');
+const { emitNotification } = require('../socket/emitters');
+const { buildNotification, NOTIFICATION_TYPE } = require('../socket/events');
 
 const getMyData = asyncHandler(async (req,res) => {
     const {id} = req.user;
@@ -167,6 +170,12 @@ const addFriend = asyncHandler(async (req,res) => {
     );
     friend.friends.addToSet({ _id: id, username: user.username, icon: user.icon });
     await friend.save();
+    emitNotification(getIo(), friendID, buildNotification({
+        type: NOTIFICATION_TYPE.FRIEND_ACCEPTED,
+        title: 'New friend',
+        body: `${user.username} accepted your friend request`,
+        meta: { friendUserId: id, friendUsername: user.username },
+    }));
     res.status(201).json({message: `Friend added`});
 
 });
@@ -234,7 +243,13 @@ const sendFriendRequest = asyncHandler(async (req,res) => {
         return res.status(409).json({message: "Can't find user to befriend"});
     }
     friend.friendRequests.addToSet({ _id: id, username: user.username, icon: user.icon });
-    friend.save();
+    await friend.save();
+    emitNotification(getIo(), friend._id, buildNotification({
+        type: NOTIFICATION_TYPE.FRIEND_REQUEST,
+        title: 'Friend request',
+        body: `${user.username} sent you a friend request`,
+        meta: { fromUserId: id, fromUsername: user.username },
+    }));
     res.status(201).json({message: `Friend request sent`});
 });
 
@@ -295,9 +310,20 @@ const sendInvite = asyncHandler(async (req,res) => {
         return res.status(409).json({message: "Invite already sent"});
     }
     game_instance.invites.addToSet({_id: friend._id.toString(), username: friend.username, icon: friend.icon});
-    game_instance.save();
+    await game_instance.save();
     friend.invites.addToSet(invite);
-    friend.save();
+    await friend.save();
+    emitNotification(getIo(), friend._id, buildNotification({
+        type: NOTIFICATION_TYPE.GAME_INVITE,
+        title: 'Game invite',
+        body: `${user.username} invited you to ${game_instance.title}`,
+        meta: {
+            tableId: String(instance),
+            title: game_instance.title,
+            senderId: id,
+            senderUsername: user.username,
+        },
+    }));
     res.status(201).json({message: `Invite sent`});
 });
 

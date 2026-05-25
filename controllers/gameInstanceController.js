@@ -3,6 +3,8 @@ const GameInstance = require('../models/GameInstance');
 const User = require('../models/User');
 const mongoose = require('mongoose');
 const { getIo } = require('../socket');
+const { emitTableUpdate } = require('../socket/emitters');
+const { TABLE_UPDATE_KIND } = require('../socket/events');
 
 const deleteGameInstance = asyncHandler(async (req,res) => {
     const id = req.params.instance;
@@ -104,7 +106,10 @@ const addPlayer = asyncHandler(async (req,res) => {
         { $pull: { invites: { "table._id": tableID } },
           $addToSet: { activeGames: gameInstance._id } }
     );
-    getIo().to(tableID).emit('player-joined', {message: `Player ${newPlayer.username} joined game instance ${tableID}`});
+    emitTableUpdate(getIo(), tableID, TABLE_UPDATE_KIND.PLAYER_JOINED, {
+        message: `Player ${newPlayer.username} joined game instance ${tableID}`,
+        username: newPlayer.username,
+    });
     res.status(201).json({message: `Player ${newPlayer.username} added to game instance ${tableID}`});
 });
 
@@ -154,7 +159,10 @@ const endGame = asyncHandler(async (gameInstanceID, winnerID) => {
     const winner = await User.findById(winnerID).select('username icon playerNumber');
     await game.deleteOne();
     
-    getIo().to(gameInstanceID).emit('game-ended', { message: 'Game ended', winner: winner});
+    emitTableUpdate(getIo(), gameInstanceID, TABLE_UPDATE_KIND.GAME_ENDED, {
+        message: 'Game ended',
+        winner,
+    });
 });
 
 module.exports = { deleteGameInstance, getAllData, loadGame, addPlayer, endGame, quitGame}

@@ -1,7 +1,7 @@
 const { Server } = require('socket.io');
 const allowedOrigins = require('../config/allowedOrigins');
+const { userRoom } = require('./events');
 
-/** @type {import('socket.io').Server | null} */
 let io = null;
 
 /**
@@ -16,7 +16,10 @@ function initSocket(server) {
     io.on('connection', (socket) => {
         console.log('client connected');
         socket.on('join-table', (tableID, userID) => {
-            socket.join(tableID);
+            socket.join(String(tableID));
+        });
+        socket.on('join-user', (userID) => {
+            socket.join(userRoom(userID));
         });
     });
 

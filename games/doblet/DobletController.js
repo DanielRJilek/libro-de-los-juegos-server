@@ -4,6 +4,8 @@ const User = require('../../models/User');
 const Doblet = require('./Doblet');
 const endGame = require('../../controllers/gameInstanceController').endGame;
 const { getIo } = require('../../socket');
+const { emitTableUpdate } = require('../../socket/emitters');
+const { TABLE_UPDATE_KIND } = require('../../socket/events');
 
 const createDobletInstance = asyncHandler(async (req,res) => {
     const id1 = req.user.id;
@@ -51,7 +53,9 @@ const startGame = asyncHandler(async (req,res) => {
     gameModel.setup();
     const updatedGame = await GameInstance.findByIdAndUpdate(tableID, 
         {"currentPlayer": gameModel.currentPlayer, "board": gameModel.board, "players": gameModel.players}, {new: true});
-    getIo().to(tableID).emit('game-start', {message: `Game instance ${tableID} started`});
+    emitTableUpdate(getIo(), tableID, TABLE_UPDATE_KIND.GAME_START, {
+        message: `Game instance ${tableID} started`,
+    });
     res.status(201).json({message: `Game instance ${tableID} started`});
 });
 
@@ -72,7 +76,12 @@ const play = asyncHandler(async (req,res) => {
     const updatedGame = await GameInstance.findByIdAndUpdate(id, 
         {"currentPlayer": gameModel.currentPlayer, "board": gameModel.board, "players": gameModel.players}, {new: true});
     const room = id;
-    getIo().to(room).emit('game-update', {board: updatedGame.board, gameState: updatedGame, dice: gameModel.dice, winner: gameModel.winner})
+    emitTableUpdate(getIo(), room, TABLE_UPDATE_KIND.STATE, {
+        board: updatedGame.board,
+        gameState: updatedGame,
+        dice: gameModel.dice,
+        winner: gameModel.winner,
+    });
     if (gameModel.winner) {
         await endGame(id, gameModel.winner._id);
     }
