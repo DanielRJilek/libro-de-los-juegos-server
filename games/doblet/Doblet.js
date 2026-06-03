@@ -2,8 +2,6 @@
 This represents the model of the game
 */
 
-const { Piece } = require('./Piece');
-
 function playerId(p) {
     if (!p || p._id == null) return null;
     return typeof p._id === 'object' && p._id.toString ? p._id.toString() : String(p._id);
@@ -17,14 +15,15 @@ function samePlayer(a, b) {
 }
 
 class Doblet {
-    constructor(id, players, board, currentPlayer) {
+    constructor(id, players, board, currentPlayer, dice) {
         this.id = id;
         this.players = players;
         this.board = board;
         this.winner = null;
-        this.dice;
+        this.dice = dice;
         this.currentPlayer = currentPlayer;
         this.otherPlayer = null;
+        this.turnMoves = [];
         for (let i=0; i<players.length; i++) {
             if (players[i].playerNumber == 1) {
                 this.player1 = players[i];
@@ -51,10 +50,10 @@ class Doblet {
             this.otherPlayer = this.player1;
         }
         for (let i=0; i<6; i++) {
-            this.board[i][0].push(new Piece(this.player1, 0));
-            this.board[i][0].push(new Piece(this.player1, 0));
-            this.board[i][3].push(new Piece(this.player2, 3));
-            this.board[i][3].push(new Piece(this.player2, 3));
+            this.board[i][0].p1++;
+            this.board[i][0].p1++;
+            this.board[i][3].p2++;
+            this.board[i][3].p2++;
         }
     }
 
@@ -70,11 +69,10 @@ class Doblet {
     }
     
     rollDice(count) {
-        const dice = [];
+        this.dice = [];
         for (let i=0;i<count;i++) {
-            dice.push(this.getRandomInt(1,6));
+            this.dice.push(this.getRandomInt(1,6));
         }
-        return dice;
     }
 
     setPlayerPhase(player, phase) {
@@ -93,73 +91,66 @@ class Doblet {
         }
     }
 
-    canMove(player, i) {
-        if (!player) return false;
-        if (player.playerNumber == 1) {
-            if (player.phase == 1) {
-                if (this.board[i][1].length == 0) {
-                    this.board[i][0].pop();
-                    this.board[i][1].push(new Piece(player, 1));
-                    return true;
-                }
-                else { return false; }           
+    tryMove(player, i) {
+        if (!player) return null;
+    
+        const homeLane = player.playerNumber === 1 ? 0 : 3;
+        const midLane  = player.playerNumber === 1 ? 1 : 2;
+        const pk = player.playerNumber === 1 ? "p1" : "p2";
+
+        if (player.phase === 1) {
+            if (this.board[i][midLane][pk] === 0 && this.board[i][homeLane][pk] > 0) {
+                this.board[i][homeLane][pk]--;
+                this.board[i][midLane][pk]++;
+                return {
+                    fromCol: i,
+                    toCol: i,
+                    fromRow: homeLane,
+                    toRow: midLane,
+                    playerNumber: player.playerNumber,
+                };
             }
-            else {
-                if (this.board[i][1].length > 0) {
-                    this.board[i][1].pop();
-                    return true;
-                }
-                else if (this.board[i][0].length > 0) {
-                    this.board[i][0].pop();
-                    return true;
-                } 
-                else {return false;}
+            return null;
+        } else {
+            if (this.board[i][midLane][pk] > 0) {
+                this.board[i][midLane][pk]--;
+                return {
+                    fromCol: i,
+                    toCol: null,
+                    fromRow: midLane,
+                    toRow: null,
+                    playerNumber: player.playerNumber,
+                };
             }
-        }
-        else if (player.playerNumber == 2) {
-            if (player.phase == 1) {
-                if (this.board[i][2].length == 0) {
-                    this.board[i][3].pop();
-                    this.board[i][2].push(new Piece(player, 2));
-                    return true;
-                }
-                else {return false;}
+            if (this.board[i][homeLane][pk] > 0) {
+                this.board[i][homeLane][pk]--;
+                return {
+                    fromCol: i,
+                    toCol: null,
+                    fromRow: homeLane,
+                    toRow: null,
+                    playerNumber: player.playerNumber,
+                };
             }
-            else {
-                if (this.board[i][2].length > 0) {
-                    this.board[i][2].pop();
-                    return true;
-                }
-                else if (this.board[i][3].length > 0) {
-                    this.board[i][3].pop();
-                    return true;
-                } 
-                else {return false;}
-            }
+            return null;
         }
     }
 
     allPlayedDown(player) {
-        if (player.playerNumber == 1) {
-            for (let i=0; i<6;i++) {
-                if (this.board[i][0].length != 1 && this.board[i][1].length != 1) {
-                    return false;
-                }
-            }
-        }
-        else if (player.playerNumber == 2) {
-            for (let i=0; i<6;i++) {
-                if (this.board[i][3].length != 1 && this.board[i][2].length != 1) {
-                    return false;
-                }
+        const homeLane = player.playerNumber === 1 ? 0 : 3;
+        const midLane  = player.playerNumber === 1 ? 1 : 2;
+        const pk = player.playerNumber === 1 ? "p1" : "p2";
+        for (let i=0; i<6;i++) {
+            if (this.board[i][homeLane][pk] != 1 && this.board[i][midLane][pk] != 1) {
+                return false;
             }
         }
         return true;
     }
 
     gameOver() {
-        const player1Won = this.board.every(row => row[0].length === 0 && row[1].length === 0);
-        const player2Won = this.board.every(row => row[2].length === 0 && row[3].length === 0);
+        const player1Won = this.board.every(row => row[0].p1 === 0 && row[1].p1 === 0);
+        const player2Won = this.board.every(row => row[2].p2 === 0 && row[3].p2 === 0);
         return player1Won || player2Won;
     }
 
@@ -168,9 +159,13 @@ class Doblet {
     }
 
     takeTurn() {
-        this.dice = this.rollDice(3);
+        this.rollDice(3);
+        this.turnMoves = [];
+
         for (let i=0; i<3; i++) {
-            if (this.canMove(this.currentPlayer, this.dice[i]-1) == true) {
+            let move = this.tryMove(this.currentPlayer, this.dice[i]-1);
+            if (move !== null) {
+                this.turnMoves.push(move);
                 if (this.allPlayedDown(this.currentPlayer)) {
                     this.setPlayerPhase(this.currentPlayer, 2);
                 }
@@ -180,7 +175,9 @@ class Doblet {
             }
             else {
                 // other player gets to use the move if possible
-                if (this.canMove(this.otherPlayer, this.dice[i]-1) == true) {
+                move = this.tryMove(this.otherPlayer, this.dice[i]-1);
+                if (move !== null) {
+                    this.turnMoves.push(move);
                     if (this.allPlayedDown(this.otherPlayer)) {
                         this.setPlayerPhase(this.otherPlayer, 2);
                     }

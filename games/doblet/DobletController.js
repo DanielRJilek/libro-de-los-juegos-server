@@ -11,12 +11,13 @@ const createDobletInstance = asyncHandler(async (req,res) => {
     const id1 = req.user.id;
     const user1 = await User.findById(id1);
     const dobletObject = {  "owner": id1,
-                            "board": Array.from({ length: 6 }, () => Array.from({ length: 4 }, () => [])),
+                            "board": Array.from({ length: 12 }, () => Array.from({ length: 4 }, () => ({p1: 0, p2: 0}))),
                             "title": "doblet",
                             "started": false,
                             "invites": [],
                             "players": [],
-                            "playerCount": 1
+                            "playerCount": 1,
+                            "dice": []
                         };
     const gameInstance = await GameInstance.create(dobletObject);
     if (!gameInstance) {
@@ -81,6 +82,7 @@ const play = asyncHandler(async (req,res) => {
         gameState: updatedGame,
         dice: gameModel.dice,
         winner: gameModel.winner,
+        turnMoves: gameModel.turnMoves,
     });
     if (gameModel.winner) {
         await endGame(id, gameModel.winner._id);
