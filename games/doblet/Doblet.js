@@ -2,6 +2,9 @@
 This represents the model of the game
 */
 
+// need to refactor this to use the TableGame class
+// also board should be 12x8
+
 function playerId(p) {
     if (!p || p._id == null) return null;
     return typeof p._id === 'object' && p._id.toString ? p._id.toString() : String(p._id);
