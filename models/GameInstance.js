@@ -13,7 +13,15 @@ const gameInstanceSchema = new mongoose.Schema({
     started : {
         type: Boolean,
         default: false
-    }
+    },
+    completed: {
+        type: Boolean,
+        default: false
+    },
+    winner: {
+        type: Object,
+        required: false
+    },
 }, {strict: false})
 
 module.exports = mongoose.model('GameInstance', gameInstanceSchema);

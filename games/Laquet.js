@@ -4,14 +4,14 @@ class Laquet extends TableGame {
     setup() {
         this.randomizePlayers();
         this.currentPlayerNumber = 1;
-        this.board = Array.from({ length: 24 }, () => ({p1: 0, p2: 0}));
-        this.board[6].p1 = 2;
-        for (let i=7; i<11; i++) {
+        this.board = Array.from({ length: 25 }, () => ({p1: 0, p2: 0}));
+        this.board[7].p1 = 2;
+        for (let i=8; i<12; i++) {
             this.board[i].p1 = 3;
         }
-        this.board[11].p2 = 14;
-        this.board[12].p2 = 1;
-        this.board[23].p1 = 1;
+        this.board[12].p2 = 14;
+        this.board[13].p2 = 1;
+        this.board[24].p1 = 1;
         this.dice = [{value: 1, used: true}, {value: 1, used: true}];
         this.turnStage = "roll";
     }
@@ -52,10 +52,8 @@ class Laquet extends TableGame {
             }            
         }
         else if (player.phase == 2) {
-            if (move.toCol != null) {
-                return false;
-            }
-            if (24 - move.fromCol > move.diceValue && move.fromCol != move.diceValue) {
+            if (25 - move.fromCol > move.diceValue && move.fromCol != move.diceValue 
+                || move.toCol - move.fromCol != move.diceValue) {
                 return false;
             }
         }
@@ -65,9 +63,6 @@ class Laquet extends TableGame {
     makeMove(move) {
         if (!this.isValidMove(move)) {
             return false;
-        }
-        if (move.toCol == null) {
-            this.board[move.fromCol][this.playerKey(move.playerNumber)]--;
         }
         else {
             this.board[move.fromCol][this.playerKey(move.playerNumber)]--;
@@ -89,7 +84,7 @@ class Laquet extends TableGame {
 
     getPlayerPieces(playerNumber) {
         let pieces = [];
-        for (let i=0; i<24; i++) {
+        for (let i=1; i<25; i++) {
             if (this.board[i][this.playerKey(playerNumber)] > 0) {
                 pieces.push(i);
             }
@@ -101,7 +96,7 @@ class Laquet extends TableGame {
         if (this.getPlayerByNumber(playerNumber).phase != 1) {
             return false;
         }
-        for (let i=0; i<18; i++) {
+        for (let i=1; i<19; i++) {
             if (this.board[i][this.playerKey(playerNumber)] > 0) {
                 return false;
             }
@@ -112,7 +107,7 @@ class Laquet extends TableGame {
     isGameOver() {
         let player1pieces = 0;
         let player2pieces = 0;
-        for (let i=0; i<24; i++) {
+        for (let i=1; i<25; i++) {
             if (this.board[i].p1 > 0) {
                 player1pieces += this.board[i].p1;
             }
