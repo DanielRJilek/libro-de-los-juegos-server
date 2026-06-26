@@ -1,4 +1,4 @@
-const TableGame = require('../TableGame');
+const TableGame = require('./TableGame');
 
 class Laquet extends TableGame {
     setup() {
@@ -95,6 +95,18 @@ class Laquet extends TableGame {
             }
         }
         return pieces;
+    }
+
+    isPhaseOneOver(playerNumber) {
+        if (this.getPlayerByNumber(playerNumber).phase != 1) {
+            return false;
+        }
+        for (let i=0; i<18; i++) {
+            if (this.board[i][this.playerKey(playerNumber)] > 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     isGameOver() {
