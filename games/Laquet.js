@@ -16,8 +16,8 @@ class Laquet extends TableGame {
         this.turnStage = "roll";
     }
 
-    roll(count) {
-        super.roll(count);
+    roll() {
+        super.roll();
         if (this.opponentCanSteal()) {
             this.turnStage = "steal";
         }

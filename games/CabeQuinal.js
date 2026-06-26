@@ -11,8 +11,8 @@ class CabeQuinal extends TableGame {
         this.board[12].p2 = 15;
     }
 
-    roll(count) {
-        super.roll(count);
+    roll() {
+        super.roll();
         if (this.opponentCanSteal()) {
             this.turnStage = "steal";
         }

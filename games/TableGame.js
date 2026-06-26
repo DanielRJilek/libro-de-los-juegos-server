@@ -11,7 +11,8 @@ class TableGame {
     endGame(player) {
         this.winner = player;
     }
-    roll(count) {
+    roll() {
+        const count = this.dice.length;
         this.dice = [];
         for (let i = 0; i < count; i++) {
             this.dice.push({value: Math.floor(Math.random() * 6) + 1, used: false});
