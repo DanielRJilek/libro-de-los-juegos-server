@@ -42,8 +42,8 @@ class CabeQuinal extends TableGame {
             return false;
         }
         if (player.phase == 1) {
-            if (this.move.fromCol == 0) {
-                if (this.move.toCol != 25 - this.move.diceValue) {
+            if (move.fromCol == 0) {
+                if (move.toCol != 25 - move.diceValue) {
                     return false;
                 }
             }
