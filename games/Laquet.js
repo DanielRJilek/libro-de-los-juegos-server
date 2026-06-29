@@ -4,6 +4,8 @@ class Laquet extends TableGame {
     setup() {
         this.randomizePlayers();
         this.currentPlayerNumber = 1;
+        this.dice = [{value: 1, used: true}, {value: 1, used: true}];
+        this.turnStage = "roll";
         this.board = Array.from({ length: 25 }, () => ({p1: 0, p2: 0}));
         this.board[7].p1 = 2;
         for (let i=8; i<12; i++) {
@@ -12,8 +14,6 @@ class Laquet extends TableGame {
         this.board[12].p2 = 14;
         this.board[13].p2 = 1;
         this.board[24].p1 = 1;
-        this.dice = [{value: 1, used: true}, {value: 1, used: true}];
-        this.turnStage = "roll";
     }
 
     roll() {
