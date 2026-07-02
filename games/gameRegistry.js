@@ -1,9 +1,13 @@
 const Laquet = require('./Laquet');
 const CabeQuinal = require('./CabeQuinal');
+const Emperador = require('./Emperador');
+const MedioEmperador = require('./MedioEmperador');
 
 const MODELS = {
   laquet: Laquet,
   cabequinal: CabeQuinal,
+  emperador: Emperador,
+  medioemperador: MedioEmperador,
 };
 
 function getGameModel(gameInstance) {

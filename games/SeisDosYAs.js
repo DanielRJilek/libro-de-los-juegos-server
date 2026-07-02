@@ -7,6 +7,7 @@ class SeisDosYAs extends TableGame {
         this.dice = [{value: 1, used: true}, {value: 1, used: true}];
         this.turnStage = "roll";
         this.board = Array.from({ length: 25 }, () => ({p1: 0, p2: 0}));
+        this.board[0] = {p1: [], p2: []};
         this.board[1].p1 = 3;
         this.board[2].p1 = 4;
         this.board[3].p2 = 5;
@@ -91,26 +92,6 @@ class SeisDosYAs extends TableGame {
         return true;
     }
 
-    canHit(playerNumber, point) {
-        const player = this.getPlayerByNumber(playerNumber);
-        const opponent = this.getOpponent(player);
-        if (this.board[point][this.playerKey(opponent.playerNumber)] == 1 && 
-            this.board[point][this.playerKey(playerNumber)] > 0) {
-            return true;
-        }
-        return false;
-    }
-
-    getPlayerPieces(playerNumber) {
-        let pieces = [];
-        for (let i=1; i<25; i++) {
-            if (this.board[i][this.playerKey(playerNumber)] > 0) {
-                pieces.push(i);
-            }
-        }
-        return pieces;
-    }
-
     isGameOver() {
         let player1pieces = 0;
         let player2pieces = 0;
@@ -131,25 +112,6 @@ class SeisDosYAs extends TableGame {
             return true;
         }
         return false;
-    }
-
-    endTurn() {
-        this.currentPlayerNumber = this.currentPlayerNumber == 1 ? 2 : 1;
-        this.turnStage = "roll";
-    }
-
-    noValidMoves(playerNumber) {
-        const playerPieces = this.getPlayerPieces(playerNumber);
-        const unusedDice = this.dice.filter(d => !d.used);
-        for (let dice of unusedDice) {
-            for (let piece of playerPieces) {
-                let toCol = this.getPlayerByNumber(playerNumber).phase == 2 ? null : piece + dice.value;
-                if (this.isValidMove({playerNumber: playerNumber, fromCol: piece, toCol: toCol, diceValue: dice.value})) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     isPhaseOneOver(playerNumber) {

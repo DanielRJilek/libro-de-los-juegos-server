@@ -50,11 +50,58 @@ class TableGame {
         }
         return false;
     }
+    getPlayerPieces(playerNumber) {
+        let pieces = [];
+        if (this.board[0][this.playerKey(playerNumber)].length > 0) {
+            for (let i = 0; i < this.board[0][this.playerKey(playerNumber)].length; i++) {
+                pieces.push(0);
+            }
+        }
+        for (let i=1; i<25; i++) {
+            if (this.board[i][this.playerKey(playerNumber)] > 0) {
+                for (let j = 0; j < this.board[i][this.playerKey(playerNumber)]; j++) {
+                    pieces.push(i);
+                }
+            }
+        }
+        return pieces;
+    }
+    endTurn() {
+        this.currentPlayerNumber = this.currentPlayerNumber == 1 ? 2 : 1;
+        this.turnStage = "roll";
+    }
+    noValidMoves(playerNumber) {
+        const playerPieces = this.getPlayerPieces(playerNumber);
+        const unusedDice = this.dice.filter(d => !d.used);
+        for (let dice of unusedDice) {
+            for (let piece of playerPieces) {
+                let toCol = this.getPlayerByNumber(playerNumber).phase == 2 ? null : piece + dice.value;
+                if (this.isValidMove({playerNumber: playerNumber, fromCol: piece, toCol: toCol, diceValue: dice.value})) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    canHit(playerNumber, point) {
+        if (point == null) {
+            return false;
+        }
+        if (point > 24 || point < 1) {
+            return false;
+        }
+        const player = this.getPlayerByNumber(playerNumber);
+        const opponent = this.getOpponent(player);
+        if (this.board[point][this.playerKey(opponent.playerNumber)] == 1 && 
+            this.board[point][this.playerKey(playerNumber)] > 0) {
+            return true;
+        }
+        return false;
+    }
     setup() { throw new Error('setup() not implemented'); }
     isGameOver() { throw new Error('isGameOver() not implemented'); }
     isValidMove(move) { throw new Error('isValidMove() not implemented'); }
     makeMove(move) { throw new Error('makeMove() not implemented'); }
-    endTurn() { throw new Error('endTurn() not implemented'); }
 }
 
 module.exports = TableGame;

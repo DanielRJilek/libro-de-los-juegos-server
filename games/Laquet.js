@@ -38,6 +38,10 @@ class Laquet extends TableGame {
             console.log("player number not current");
             return false;
         }
+        if (move.fromCol == 0) {
+            console.log("from col is bar");
+            return false;
+        }
         if (this.board[move.fromCol][this.playerKey(move.playerNumber)] == 0) {
                 console.log("player has no pieces in from col");
                 return false;
@@ -82,16 +86,6 @@ class Laquet extends TableGame {
         return true;
     }
 
-    getPlayerPieces(playerNumber) {
-        let pieces = [];
-        for (let i=1; i<25; i++) {
-            if (this.board[i][this.playerKey(playerNumber)] > 0) {
-                pieces.push(i);
-            }
-        }
-        return pieces;
-    }
-
     isPhaseOneOver(playerNumber) {
         if (this.getPlayerByNumber(playerNumber).phase != 1) {
             return false;
@@ -124,25 +118,6 @@ class Laquet extends TableGame {
             return true;
         }
         return false;
-    }
-
-    endTurn() {
-        this.currentPlayerNumber = this.currentPlayerNumber == 1 ? 2 : 1;
-        this.turnStage = "roll";
-    }
-
-    noValidMoves(playerNumber) {
-        const playerPieces = this.getPlayerPieces(playerNumber);
-        const unusedDice = this.dice.filter(d => !d.used);
-        for (let dice of unusedDice) {
-            for (let piece of playerPieces) {
-                let toCol = this.getPlayerByNumber(playerNumber).phase == 2 ? null : piece + dice.value;
-                if (this.isValidMove({playerNumber: playerNumber, fromCol: piece, toCol: toCol, diceValue: dice.value})) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     opponentCanSteal() {
