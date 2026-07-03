@@ -140,6 +140,7 @@ class Emperador extends TableGame {
             if (this.canHit(move.playerNumber, move.toCol)) {
                 this.board[move.toCol][this.playerKey(opponent.playerNumber)] = 0;
                 this.board[0][this.playerKey(opponent.playerNumber)].push(move.toCol);
+                if (opponent.phase == 2) {opponent.phase = 1;}
             }
         }
         this.dice.find(d => d.value == move.diceValue && !d.used).used = true;
