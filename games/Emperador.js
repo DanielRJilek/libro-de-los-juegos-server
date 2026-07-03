@@ -34,7 +34,7 @@ class Emperador extends TableGame {
             console.log("player has a piece on the bar");
             return false;
         }
-        if (this.board[move.toCol][this.playerKey(opponent.playerNumber)] > 1) {
+        if (move.toCol != null && this.board[move.toCol][this.playerKey(opponent.playerNumber)] > 1) {
             console.log("opponent has more than 1 piece in the destination col");
             return false;
         }
@@ -90,12 +90,12 @@ class Emperador extends TableGame {
             // bear off
             if (move.toCol == null) {
                 if (player.playerNumber == 1) {
-                    if (move.fromCol != 18 + move.diceValue) {
+                    if ((move.fromCol != 18 + move.diceValue) && (move.fromCol + move.diceValue < 25)) {
                         return false;
                     }
                 }
                 else {
-                    if (move.fromCol != move.diceValue) {
+                    if ((move.fromCol != move.diceValue) && (move.fromCol - move.diceValue > 0)) {
                         return false;
                     }
                 }
@@ -128,6 +128,10 @@ class Emperador extends TableGame {
         if (!this.isValidMove(move)) {
             return false;
         }
+        if (move.toCol == null) {
+            this.board[move.fromCol][this.playerKey(move.playerNumber)]--;
+        }
+
         else {
             if (move.fromCol == 0) {
                 this.board[0][this.playerKey(move.playerNumber)].pop();
@@ -201,7 +205,7 @@ class Emperador extends TableGame {
             return false;
         }
         if (playerNumber == 1) {
-            for (let i=1; i<18; i++) {
+            for (let i=1; i<19; i++) {
                 if (this.board[i][this.playerKey(playerNumber)] > 0) {
                     console.log("player 1 has pieces in the board");
                     return false;
