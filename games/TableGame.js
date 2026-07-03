@@ -52,7 +52,7 @@ class TableGame {
     }
     getPlayerPieces(playerNumber) {
         let pieces = [];
-        if (this.board[0][this.playerKey(playerNumber)].length > 0) {
+        if (this.board[0][this.playerKey(playerNumber)]?.length > 0) {
             for (let i = 0; i < this.board[0][this.playerKey(playerNumber)].length; i++) {
                 pieces.push(0);
             }

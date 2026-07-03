@@ -46,7 +46,7 @@ class Emperador extends TableGame {
         if (player.phase == 1) {
             // reentry
             if (move.fromCol == 0) {
-                if (this.board[0][this.playerKey(move.playerNumber)].length != 0) {
+                if (this.board[0][this.playerKey(move.playerNumber)].length == 0) {
                     console.log("player has no pieces on the bar");
                     return false;
                 }
@@ -57,7 +57,7 @@ class Emperador extends TableGame {
                     }
                 }
                 else {
-                    if (move.toCol != (this.reentryPoint(move.playerNumber) - 1) - move.diceValue) {
+                    if (move.toCol != (this.reentryPoint(move.playerNumber) + 1) - move.diceValue) {
                         console.log("move to col is not the reentry point minus the dice value");
                         return false;
                     }
@@ -139,7 +139,7 @@ class Emperador extends TableGame {
             }
             if (this.canHit(move.playerNumber, move.toCol)) {
                 this.board[move.toCol][this.playerKey(opponent.playerNumber)] = 0;
-                this.board[0][this.playerKey(opponent.playerNumber)].push({owner: opponent.playerNumber, point: move.toCol});
+                this.board[0][this.playerKey(opponent.playerNumber)].push(move.toCol);
             }
         }
         this.dice.find(d => d.value == move.diceValue && !d.used).used = true;
