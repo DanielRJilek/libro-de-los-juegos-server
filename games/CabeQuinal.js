@@ -82,6 +82,9 @@ class CabeQuinal extends TableGame {
             }
         }
         this.dice.find(d => d.value == move.diceValue && !d.used).used = true;
+        if (this.isPhaseOneOver(move.playerNumber)) {
+            player.phase = 2;
+        }
         if (this.isGameOver()) {
             this.winner = this.getPlayerByNumber(move.playerNumber);
             return true;

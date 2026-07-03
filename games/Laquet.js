@@ -65,6 +65,8 @@ class Laquet extends TableGame {
     }
 
     makeMove(move) {
+        const player = this.getPlayerByNumber(move.playerNumber);
+        const opponent = this.getOpponent(player);
         if (!this.isValidMove(move)) {
             return false;
         }
@@ -73,6 +75,9 @@ class Laquet extends TableGame {
             this.board[move.toCol][this.playerKey(move.playerNumber)]++;
         }
         this.dice.find(d => d.value == move.diceValue && !d.used).used = true;
+        if (this.isPhaseOneOver(move.playerNumber)) {
+            player.phase = 2;
+        }
         if (this.isGameOver()) {
             this.winner = this.getPlayerByNumber(move.playerNumber);
             return true;

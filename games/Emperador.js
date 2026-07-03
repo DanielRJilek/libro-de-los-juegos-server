@@ -143,6 +143,9 @@ class Emperador extends TableGame {
             }
         }
         this.dice.find(d => d.value == move.diceValue && !d.used).used = true;
+        if (this.isPhaseOneOver(move.playerNumber)) {
+            player.phase = 2;
+        }
         if (this.isGameOver()) {
             this.winner = this.getPlayerByNumber(move.playerNumber);
             return true;
@@ -199,6 +202,7 @@ class Emperador extends TableGame {
         if (playerNumber == 1) {
             for (let i=1; i<18; i++) {
                 if (this.board[i][this.playerKey(playerNumber)] > 0) {
+                    console.log("player 1 has pieces in the board");
                     return false;
                 }
             }
@@ -206,6 +210,7 @@ class Emperador extends TableGame {
         else {
             for (let i=7; i<25; i++) {
                 if (this.board[i][this.playerKey(playerNumber)] > 0) {
+                    console.log("player 2 has pieces in the board");
                     return false;
                 }
             }
